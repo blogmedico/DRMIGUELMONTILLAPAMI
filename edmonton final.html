@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escala de Fragilidad de Edmonton</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f0f8ff; }
+        .container { max-width: 800px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { text-align: center; }
+        table { width: 100%; border-collapse: collapse; margin-top: 20px; }
+        th, td { border: 1px solid #000; padding: 10px; text-align: center; }
+        th { background-color: #007bff; color: white; }
+        .description { font-size: 12px; text-align: left; color: #555; }
+        button { display: block; margin: 20px auto; padding: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        #resultado { font-weight: bold; text-align: center; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Escala de Fragilidad de Edmonton</h2>
+        <table>
+            <tr>
+                <th>Dominio de Fragilidad</th>
+                <th>Item</th>
+                <th>0 puntos</th>
+                <th>1 punto</th>
+                <th>2 puntos</th>
+            </tr>
+            <tr>
+                <td>Cognitivo</td>
+                <td>Ejercicio del reloj</td>
+                <td><input type="checkbox" name="cognitivo" value="0"></td>
+                <td><input type="checkbox" name="cognitivo" value="1"></td>
+                <td><input type="checkbox" name="cognitivo" value="2"></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td colspan="4" class="description">0 puntos: Ejercicio del reloj normal. 1 punto: Ejercicio parcialmente adecuado. 2 puntos: Ejercicio completamente inadecuado.</td>
+            </tr>
+            <tr>
+                <td>Estado de Salud General</td>
+                <td>Hospitalizaciones en el último año</td>
+                <td><input type="checkbox" name="salud" value="0"></td>
+                <td><input type="checkbox" name="salud" value="1"></td>
+                <td><input type="checkbox" name="salud" value="2"></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td colspan="4" class="description">0 puntos: Ninguna hospitalización. 1 punto: 1 hospitalización. 2 puntos: 2 o más hospitalizaciones.</td>
+            </tr>
+            <tr>
+                <td>Estado de Salud General</td>
+                <td>Descripción de salud</td>
+                <td><input type="checkbox" name="descripcion_salud" value="0"></td>
+                <td><input type="checkbox" name="descripcion_salud" value="1"></td>
+                <td><input type="checkbox" name="descripcion_salud" value="2"></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td colspan="4" class="description">0 puntos: Salud excelente. 1 punto: Salud buena. 2 puntos: Salud regular o mala.</td>
+            </tr>
+            <tr>
+                <td>Funcional</td>
+                <td>Capacidad para realizar tareas de la vida diaria</td>
+                <td><input type="checkbox" name="funcional" value="0"></td>
+                <td><input type="checkbox" name="funcional" value="1"></td>
+                <td><input type="checkbox" name="funcional" value="2"></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td colspan="4" class="description">0 puntos: Sin dificultades. 1 punto: Dificultades moderadas. 2 puntos: Gran dificultad o incapacidad.</td>
+            </tr>
+            <tr>
+                <td>Social</td>
+                <td>Red de apoyo social</td>
+                <td><input type="checkbox" name="social" value="0"></td>
+                <td><input type="checkbox" name="social" value="1"></td>
+                <td><input type="checkbox" name="social" value="2"></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td colspan="4" class="description">0 puntos: Red de apoyo fuerte. 1 punto: Red de apoyo moderada. 2 puntos: Red de apoyo débil o inexistente.</td>
+            </tr>
+            <tr>
+                <td>Estado Nutricional</td>
+                <td>Ingesta alimentaria en los últimos 3 días</td>
+                <td><input type="checkbox" name="nutricional" value="0"></td>
+                <td><input type="checkbox" name="nutricional" value="1"></td>
+                <td><input type="checkbox" name="nutricional" value="2"></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td colspan="4" class="description">0 puntos: Buena ingesta. 1 punto: Ingesta moderada. 2 puntos: Ingesta insuficiente.</td>
+            </tr>
+            <tr>
+                <td>Estado Nutricional</td>
+                <td>Pérdida de peso no intencionada</td>
+                <td><input type="checkbox" name="perdida_peso" value="0"></td>
+                <td><input type="checkbox" name="perdida_peso" value="1"></td>
+                <td><input type="checkbox" name="perdida_peso" value="2"></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td colspan="4" class="description">0 puntos: Ninguna pérdida de peso. 1 punto: Pérdida leve. 2 puntos: Pérdida importante.</td>
+            </tr>
+            <tr>
+                <td>Estado Físico</td>
+                <td>Capacidad para caminar 400 metros</td>
+                <td><input type="checkbox" name="caminar" value="0"></td>
+                <td><input type="checkbox" name="caminar" value="1"></td>
+                <td><input type="checkbox" name="caminar" value="2"></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td colspan="4" class="description">0 puntos: Puede caminar 400 metros sin problemas. 1 punto: Dificultades para caminar. 2 puntos: No puede caminar 400 metros.</td>
+            </tr>
+            <tr>
+                <td>Estado Físico</td>
+                <td>Caídas en el último año</td>
+                <td><input type="checkbox" name="caidas" value="0"></td>
+                <td><input type="checkbox" name="caidas" value="1"></td>
+                <td><input type="checkbox" name="caidas" value="2"></td>
+            </tr>
+            <tr>
+                <td></td>
+                <td colspan="4" class="description">0 puntos: Ninguna caída. 1 punto: 1 caída. 2 puntos: 2 o más caídas.</td>
+            </tr>
+        </table>
+        <button onclick="calcularPuntaje()">Calcular Puntaje</button>
+        <p id="resultado"></p>
+        <button onclick="generarPDF()">Generar PDF</button>
+    </div>
+
+    <script>
+    function calcularPuntaje() {
+        let total = 0;
+        document.querySelectorAll('input[type=checkbox]:checked').forEach(input => {
+            total += parseInt(input.value);
+        });
+        document.getElementById('resultado').innerText = 'Puntaje total: ' + total;
+    }
+
+    function generarPDF() {
+        const { jsPDF } = window.jspdf;
+        const doc = new jsPDF();
+        doc.setFontSize(14);
+        doc.text("Escala de Fragilidad de Edmonton", 60, 10);
+        doc.setFontSize(12);
+        
+        const resultado = document.getElementById('resultado').innerText;
+        doc.text(resultado, 60, 20);
+        
+        doc.setFontSize(10);
+        doc.text("Idea original de Dr. Montilla Miguel", 10, 280);
+        doc.save("Escala_Fragilidad_Edmonton.pdf");
+    }
+</script>
+</body>
+</html>
