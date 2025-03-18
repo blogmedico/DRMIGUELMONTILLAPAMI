@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escala de Depresión de Yesavage</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #295f54;
+            text-align: center;
+        }
+        .container {
+            max-width: 700px;
+            background: #dd8888;
+            padding: 20px;
+            border-radius: 10px;
+            margin: auto;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.3);
+            color: black;
+        }
+        h2 {
+            background: #ffffcc;
+            padding: 10px;
+            margin: 0;
+            font-size: 20px;
+        }
+        .question {
+            display: flex;
+            justify-content: space-between;
+            padding: 5px 10px;
+            font-size: 16px;
+            border-bottom: 1px solid black;
+        }
+        .options {
+            display: flex;
+            gap: 20px;
+        }
+        .buttons {
+            margin-top: 20px;
+        }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 15px;
+            font-size: 16px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        #result {
+            margin-top: 20px;
+            font-size: 18px;
+            font-weight: bold;
+        }
+        .score {
+            background: white;
+            padding: 5px;
+            display: inline-block;
+            width: 50px;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Escala de Depresión de Yesavage</h2>
+        <form id="yesavageForm">
+            <script>
+                const preguntas = [
+                    "¿Está básicamente satisfecho con su vida?",
+                    "¿Ha renunciado a muchas de sus actividades e intereses?",
+                    "¿Siente que su vida está vacía?",
+                    "¿Se encuentra a menudo aburrido?",
+                    "¿Tiene esperanzas en el futuro?",
+                    "¿Tiene molestias (malestar, mareo) por pensamientos que no puede sacar de la cabeza?",
+                    "¿Tiene a menudo buen ánimo?",
+                    "¿Tiene miedo de que le pase algo malo?",
+                    "¿Se siente feliz muchas veces?",
+                    "¿Se siente a menudo abandonado?",
+                    "¿Se siente intranquilo o inquieto?",
+                    "¿Prefiere quedarse en casa que salir y hacer cosas nuevas?",
+                    "¿Frecuentemente está preocupado por el futuro?",
+                    "¿Cree tener más problemas de memoria que la mayoría de la gente?",
+                    "¿Piensa que es maravilloso vivir?",
+                    "¿Se siente a menudo desanimado y melancólico?",
+                    "¿Se siente bastante inútil en el medio en que está?",
+                    "¿Está muy preocupado por el pasado?",
+                    "¿Encuentra su vida muy estimulante?",
+                    "¿Es difícil para usted poner en marcha nuevos proyectos?",
+                    "¿Se siente lleno de energía?",
+                    "¿Siente que su situación es desesperada?",
+                    "¿Cree que mucha gente está mejor que usted?",
+                    "¿Frecuentemente está preocupado por pequeños detalles?",
+                    "¿Frecuentemente siente ganas de llorar?",
+                    "¿Tiene problemas para concentrarse?",
+                    "¿Se siente mejor por la mañana al levantarse?",
+                    "¿Prefiere evitar reuniones sociales?",
+                    "¿Es fácil para usted tomar decisiones?",
+                    "¿Su mente está tan clara como acostumbraba a estar?"
+                ];
+                let html = "";
+                preguntas.forEach((pregunta, index) => {
+                    html += `<div class='question'>${index + 1}. ${pregunta}
+                        <div class='options'>
+                            <input type='radio' name='q${index + 1}' value='1'> Sí
+                            <input type='radio' name='q${index + 1}' value='0'> No
+                        </div>
+                    </div>`;
+                });
+                document.write(html);
+            </script>
+            <div class="buttons">
+                <button type="button" onclick="calcularEscala()">Calcular</button>
+                <button type="reset">Borrar los datos</button>
+                <button type="button" onclick="generarPDF()">Generar PDF</button>
+                <button type="button" onclick="guardarPortapapeles()">Guardar en portapapeles</button>
+                <button type="button" onclick="imprimirEscala()">Imprimir Escala</button>
+            </div>
+        </form>
+        <div id="result">Puntuación total: <span class="score" id="score">0</span></div>
+        <div id="interpretacion"></div>
+    </div>
+    
+    <script>
+        function calcularEscala() {
+            let score = 0;
+            const respuestas = document.querySelectorAll('input[type="radio"]:checked');
+            respuestas.forEach(respuesta => {
+                score += parseInt(respuesta.value);
+            });
+            document.getElementById("score").innerText = score;
+            let interpretacion = "";
+            if (score <= 5) {
+                interpretacion = "No indica depresión.";
+            } else if (score <= 10) {
+                interpretacion = "Depresión leve.";
+            } else {
+                interpretacion = "Depresión significativa. Se recomienda evaluación médica.";
+            }
+            document.getElementById("interpretacion").innerText = interpretacion;
+        }
+
+        function generarPDF() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            const score = document.getElementById("score").innerText;
+            const interpretacion = document.getElementById("interpretacion").innerText;
+
+            let content = "Escala de Depresión de Yesavage\n\n";
+            const respuestas = document.querySelectorAll('input[type="radio"]:checked');
+            let num = 1;
+            respuestas.forEach(respuesta => {
+                let preguntaText = preguntas[num - 1];
+                let respuestaText = respuesta.value == 1 ? "Sí" : "No";
+                content += `${num}. ${preguntaText}\nRespuesta: ${respuestaText}\n\n`;
+                num++;
+            });
+
+            doc.text(content, 10, 10);
+            doc.text(`Puntuación Total: ${score}`, 10, 20);
+            doc.text(`Interpretación: ${interpretacion}`, 10, 30);
+            doc.save("escala_depresion_yesavage.pdf");
+        }
+
+        function guardarPortapapeles() {
+            const score = document.getElementById("score").innerText;
+            const interpretacion = document.getElementById("interpretacion").innerText;
+            const texto = `Escala de Depresión de Yesavage\nPuntuación Total: ${score}\nInterpretación: ${interpretacion}`;
+            
+            navigator.clipboard.writeText(texto).then(() => {
+                alert("Información copiada al portapapeles.");
+            }).catch(err => {
+                console.error("Error al copiar al portapapeles: ", err);
+            });
+        }
+
+        function imprimirEscala() {
+            const score = document.getElementById("score").innerText;
+            const interpretacion = document.getElementById("interpretacion").innerText;
+            let contenido = `<h2>Escala de Depresión de Yesavage</h2><br>`;
+            const respuestas = document.querySelectorAll('input[type="radio"]:checked');
+            let num = 1;
+            respuestas.forEach(respuesta => {
+                let preguntaText = preguntas[num - 1];
+                let respuestaText = respuesta.value == 1 ? "Sí" : "No";
+                contenido += `${num}. ${preguntaText}<br>Respuesta: ${respuestaText}<br><br>`;
+                num++;
+            });
+            contenido += `<br>Puntuación Total: ${score}<br>Interpretación: ${interpretacion}<br>`;
+
+            const ventana = window.open('', '', 'width=800,height=600');
+            ventana.document.write(contenido);
+            ventana.document.close();
+            ventana.print();
+        }
+    </script>
+</body>
+</html>
