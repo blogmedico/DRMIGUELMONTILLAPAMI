@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escala FRAIL</title>
+    <style>
+        body { 
+            font-family: Arial, sans-serif; 
+            background-color: #e8f5e9; 
+            color: #2e7d32; 
+            margin: 0; 
+            padding: 0; 
+            display: flex; 
+            justify-content: center; 
+            align-items: center; 
+            height: 100vh; 
+        }
+        .container { 
+            background: #ffffff; 
+            border-radius: 10px; 
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); 
+            padding: 20px; 
+            max-width: 600px; 
+            width: 90%; 
+            text-align: center; 
+        }
+        h2 { 
+            color: #1b5e20; 
+        }
+        .question { 
+            margin-bottom: 15px; 
+            text-align: left;
+        }
+        label { 
+            display: block; 
+            margin: 5px 0; 
+            cursor: pointer; 
+        }
+        button { 
+            background-color: #388e3c; 
+            color: white; 
+            border: none; 
+            padding: 10px 15px; 
+            border-radius: 5px; 
+            cursor: pointer; 
+            font-size: 16px; 
+        }
+        button:hover { 
+            background-color: #2e7d32; 
+        }
+        h3 { 
+            margin-top: 15px; 
+            color: #1b5e20; 
+        }
+        span#resultado {
+            font-weight: bold;
+            color: #d32f2f;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Escala FRAIL</h2>
+        <form id="frailForm">
+            <div class="question">
+                <p>Fatigabilidad: ¿Qué parte del tiempo se ha sentido cansado durante las últimas 4 semanas?</p>
+                <label><input type="radio" name="fatigue" value="1"> A menudo o siempre</label>
+                <label><input type="radio" name="fatigue" value="0"> Rara vez o nunca</label>
+            </div>
+            <div class="question">
+                <p>Resistencia: ¿Tiene dificultad para caminar 10 escalones sin descansar?</p>
+                <label><input type="radio" name="resistance" value="1"> Sí</label>
+                <label><input type="radio" name="resistance" value="0"> No</label>
+            </div>
+            <div class="question">
+                <p>Deambulación: ¿Tiene dificultad para caminar varios cientos de metros sin ayuda?</p>
+                <label><input type="radio" name="aerobic" value="1"> Sí</label>
+                <label><input type="radio" name="aerobic" value="0"> No</label>
+            </div>
+            <div class="question">
+                <p>Comorbilidad: ¿Tiene alguna de las siguientes enfermedades? (HTA, DBT, Cáncer, EPOC, ICC, etc.)</p>
+                <label><input type="radio" name="illnesses" value="1"> Sí</label>
+                <label><input type="radio" name="illnesses" value="0"> No</label>
+            </div>
+            <div class="question">
+                <p>Pérdida de peso: ¿Ha perdido al menos 5% de su peso en los últimos 12 meses?</p>
+                <label><input type="radio" name="weight" value="1"> Sí</label>
+                <label><input type="radio" name="weight" value="0"> No</label>
+            </div>
+            <button type="button" onclick="calcularFrail()">Calcular FRAIL</button>
+        </form>
+        <h3>Resultado: <span id="resultado"></span></h3>
+    </div>
+    
+    <script>
+        function calcularFrail() {
+            let total = 0;
+            const form = document.getElementById('frailForm');
+            const respuestas = ['fatigue', 'resistance', 'aerobic', 'illnesses', 'weight'];
+            
+            respuestas.forEach(nombre => {
+                const seleccion = form.querySelector(`input[name="${nombre}"]:checked`);
+                if (seleccion) {
+                    total += parseInt(seleccion.value);
+                }
+            });
+            
+            let resultado = "";
+            if (total >= 3) {
+                resultado = "Frágil";
+            } else if (total === 1 || total === 2) {
+                resultado = "Pre-frágil";
+            } else {
+                resultado = "Robusto";
+            }
+            
+            document.getElementById('resultado').innerText = resultado + " (Puntuación: " + total + ")";
+        }
+    </script>
+</body>
+</html>
