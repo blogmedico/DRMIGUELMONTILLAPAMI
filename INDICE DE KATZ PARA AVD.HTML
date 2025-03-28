@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Escala de Lawton y Brody - AVDi</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; background-color: #f0f8ff; }
+        .container { max-width: 600px; margin: auto; background: white; padding: 20px; border-radius: 8px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+        h2 { text-align: center; }
+        .question { margin-bottom: 15px; }
+        button { display: block; margin: 10px auto; padding: 10px; background: #007bff; color: white; border: none; border-radius: 5px; cursor: pointer; }
+        button:hover { background: #0056b3; }
+        #resultado { font-weight: bold; text-align: center; margin-top: 20px; }
+        .hidden { display: none; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h2>Escala de Lawton y Brody - AVDi</h2>
+        <form id="lawtonForm">
+            <div id="questions"></div>
+            <button type="button" onclick="calcularIndice()">Calcular Índice</button>
+            <p id="resultado"></p>
+            <button type="button" id="btnGenerar" class="hidden" onclick="generarPDFyCopiar()">Generar PDF y Copiar</button>
+        </form>
+    </div>
+    
+    <script>
+        const actividades = [
+            "Uso del teléfono",
+            "Compras",
+            "Preparación de comidas",
+            "Cuidado de la casa",
+            "Lavado de ropa",
+            "Uso de medios de transporte",
+            "Responsabilidad sobre medicación",
+            "Manejo del dinero"
+        ];
+
+        const container = document.getElementById("questions");
+        actividades.forEach((act, i) => {
+            container.innerHTML += `
+                <div class='question'>
+                    <label>${i + 1}. ${act}</label><br>
+                    <input type='radio' name='act${i}' value='independiente' checked> Independiente
+                    <input type='radio' name='act${i}' value='dependiente'> Dependiente
+                </div>
+            `;
+        });
+
+        function calcularIndice() {
+            let puntuacion = 0;
+            actividades.forEach((_, i) => {
+                let respuesta = document.querySelector(`input[name='act${i}']:checked`).value;
+                if (respuesta === 'independiente') puntuacion++;
+            });
+
+            let resultadoTexto = `Puntuación de Lawton y Brody: ${puntuacion} / 8 - `;
+            if (puntuacion === 8) resultadoTexto += "Independiente";
+            else if (puntuacion >= 5) resultadoTexto += "Dependencia leve";
+            else if (puntuacion >= 3) resultadoTexto += "Dependencia moderada";
+            else resultadoTexto += "Dependencia severa";
+
+            document.getElementById("resultado").innerText = resultadoTexto;
+            document.getElementById("btnGenerar").classList.remove("hidden");
+        }
+
+        function generarPDFyCopiar() {
+            const { jsPDF } = window.jspdf;
+            const doc = new jsPDF();
+            let y = 20;
+            let puntuacion = 0;
+            let texto = "Escala de Lawton y Brody - AVDi\n\n";
+
+            doc.setFontSize(14);
+            doc.text("Escala de Lawton y Brody - AVDi", 60, 10);
+            doc.setFontSize(12);
+
+            actividades.forEach((act, i) => {
+                let respuesta = document.querySelector(`input[name='act${i}']:checked`).value;
+                if (respuesta === 'independiente') puntuacion++;
+
+                let lineaTexto = `${i + 1}. ${act}: ${respuesta.toUpperCase()}`;
+                texto += lineaTexto + "\n";
+                doc.text(lineaTexto, 10, y);
+                y += 10;
+            });
+
+            let resultadoTexto = `Puntuación de Lawton y Brody: ${puntuacion} / 8 - `;
+            if (puntuacion === 8) resultadoTexto += "Independiente";
+            else if (puntuacion >= 5) resultadoTexto += "Dependencia leve";
+            else if (puntuacion >= 3) resultadoTexto += "Dependencia moderada";
+            else resultadoTexto += "Dependencia severa";
+
+            texto += "\n" + resultadoTexto;
+            doc.text(resultadoTexto, 10, y + 10);
+
+            // Agregar el pie de página con el crédito
+            doc.setFontSize(10);
+            doc.text("Idea original de Dr. Montilla Miguel", 10, 280);
+
+            doc.save("Escala_Lawton_Brody.pdf");
+
+            // Copiar el texto al portapapeles
+            copiarTexto(texto);
+        }
+
+        function copiarTexto(texto) {
+            navigator.clipboard.writeText(texto).then(() => {
+                alert("Texto copiado al portapapeles");
+            }).catch(err => {
+                console.error("Error al copiar el texto", err);
+            });
+        }
+    </script>
+</body>
+</html>
