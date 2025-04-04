@@ -1,0 +1,563 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins:200,300,400,500,600,700,800,900&display=swap');
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Poppins', sans-serif;
+}
+
+body {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #2f363e;
+}
+
+/*Analog Clock Style */
+.container {
+  position: relative;
+  background: #2f363e;
+  border-radius: 20px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+
+}
+
+.clock {
+  position: relative;
+  width: 450px;
+  height: 450px;
+  background: #2f363e;
+  border-radius: 50%;
+  box-shadow: 10px 50px 70px rgba(0, 0, 0, 0.25),
+    inset 5px 5px 10px rgba(0, 0, 0, 0.5),
+    inset 5px 5px 20px rgba(255, 255, 255, 0.2),
+    inset -5px -5px 15px rgba(0, 0, 0, 0.75);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.clock::before {
+  content: '';
+  position: absolute;
+  width: 8px;
+  height: 8px;
+  background: #2f363e;
+  border: 3px solid #fff;
+  border-radius: 50%;
+  z-index: 100000;
+}
+
+.clock span {
+  position: absolute;
+  inset: 20px;
+  color: #fff;
+  text-align: center;
+  transform: rotate(calc(30deg * var(--i)));
+  /*360 / 12 = 30deg */
+}
+
+.clock span b {
+  font-size: 2em;
+  opacity: 0.25;
+  font-weight: 600;
+  display: inline-block;
+  transform: rotate(calc(-30deg * var(--i)));
+}
+
+.circle {
+  position: absolute;
+  width: 300px;
+  height: 300px;
+  border: 2px solid rgba(0, 0, 0, 0.25);
+  border-radius: 50%;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+  z-index: 10;
+}
+
+.circle i {
+  position: absolute;
+  width: 6px;
+  height: 50%;
+  background: var(--clr);
+  opacity: 0.75;
+  transform-origin: bottom;
+  transform: scaleY(0.5);
+}
+
+.circle:nth-child(1) i {
+  width: 2px;
+}
+
+.circle:nth-child(2) i {
+  width: 6px;
+}
+
+.circle2 {
+  width: 240px;
+  height: 240px;
+  z-index: 9;
+}
+
+.circle3 {
+  width: 180px;
+  height: 180px;
+  z-index: 8;
+}
+
+.circle::before {
+  content: '';
+  position: absolute;
+  top: -8.5px;
+  width: 15px;
+  height: 15px;
+  border-radius: 50%;
+  background: var(--clr);
+  box-shadow: 0 0 10px var(--clr),
+    0 0 40px var(--clr);
+}
+
+/* digital clock style */
+
+#time {
+  margin-bottom: -80px;
+  display: flex;
+  transform: translateY(15px);
+  padding: 10px 10px;
+  font-size: 2em;
+  font-weight: 600;
+  border: 2px solid rgba(0, 0, 0, 0.5);
+  border-radius: 40px;
+  box-shadow: 5px 5px 10px rgba(0, 0, 0, 0.5),
+    inset 5px 5px 20px rgba(255, 255, 255, 0.2),
+    inset -5px -5px 15px rgba(0, 0, 0, 0.75);
+  margin-left: 15px;
+}
+
+#time div {
+  position: relative;
+  width: 60px;
+  text-align: center;
+  font-weight: 500;
+  color: var(--clr);
+}
+
+#time div:nth-child(1)::after,
+#time div:nth-child(2)::after {
+  content: ':';
+  position: absolute;
+  right: -4px;
+}
+
+#time div:last-child {
+  font-size: 0.5em;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  color: #fff;
+}
+
+#time div:nth-child(2)::after {
+  animation: animate 1s steps(1) infinite;
+}
+
+@keyframes animate {
+  0% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0;
+  }
+}
+
+/* Make Responsive */
+
+@media screen and (max-width: 768px) {
+  .container {
+    border-radius: 10px;
+  }
+
+  .clock {
+    width: 300px;
+    height: 300px;
+  }
+
+  .clock span {
+    inset: 15px;
+  }
+
+  .clock span b {
+    font-size: 1.5em;
+  }
+
+  .circle {
+    width: 200px;
+    height: 200px;
+  }
+
+  .circle i {
+    height: 40%;
+  }
+
+  .circle:nth-child(1) i {
+    width: 1px;
+  }
+
+  .circle:nth-child(2) i {
+    width: 3px;
+  }
+
+  .circle2 {
+    width: 150px;
+    height: 150px;
+  }
+
+  .circle3 {
+    width: 100px;
+    height: 100px;
+  }
+
+  .circle::before {
+    top: -6.5px;
+    width: 10px;
+    height: 10px;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  .container {
+    border-radius: 0;
+  }
+
+  .clock {
+    width: 200px;
+    height: 200px;
+  }
+
+  .clock span {
+    inset: 10px;
+  }
+
+  .clock span b {
+    font-size: 1em;
+  }
+
+  .circle {
+    width: 120px;
+    height: 120px;
+  }
+
+  .circle i {
+    height: 30%;
+  }
+
+  .circle:nth-child(1) i {
+    width: 1px;
+  }
+
+  .circle:nth-child(2) i {
+    width: 2px;
+  }
+
+  .circle2 {
+    width: 80px;
+    height: 80px;
+  }
+
+  .circle3 {
+    width: 60px;
+    height: 60px;
+  }
+
+  .circle::before {
+    top: -4.5px;
+    width: 8px;
+    height: 8px;
+  }
+}
+
+@media screen and (max-width: 768px) {
+  #time {
+    font-size: 1.5em;
+    padding: 5px 5px;
+    margin-left: 10px;
+  }
+
+  #time div {
+    width: 50px;
+  }
+
+  #time div:last-child {
+    font-size: 0.4em;
+  }
+}
+
+@media screen and (max-width: 480px) {
+  #time {
+    font-size: 1em;
+    padding: 2px 2px;
+    margin-left: 5px;
+  }
+
+  #time div {
+    width: 40px;
+  }
+
+  #time div:last-child {
+    font-size: 0.3em;
+  }
+}
+
+.circle { 
+  posición : absoluta; 
+  ancho : 300px ; 
+  alto : 300px ; 
+  borde : 2px sólido rgba ( 0 , 0 , 0 , 0.25 ); 
+  radio del borde : 50% ; 
+  visualización : flexible; 
+  contenido justificado : centrado; 
+  elementos de alineación : inicio flexible; 
+  índice z : 10 ; 
+} 
+
+.circle  i { 
+  posición : absoluta; 
+  ancho : 6px ; 
+  alto : 50% ; 
+  fondo : var (--clr); 
+  opacidad : 0.75 ; 
+  origen de transformación : inferior; 
+  transform : scaleY ( 0.5 ); 
+} 
+
+.circle :nth-child ( 1 ) i { 
+  ancho : 2px ; 
+} 
+
+.circle :nth-child ( 2 ) i { 
+  ancho : 6px ; 
+} 
+
+.circle2 { 
+  ancho : 240px ; 
+  alto : 240px ; 
+  índice z : 9 ; 
+} 
+
+.circle3 { 
+  ancho : 180px ; 
+  alto : 180px ; 
+  índice z : 8 ; 
+} 
+
+.circle ::before { 
+  contenido : '' ; 
+  posición : absoluta; 
+  superior : - 8.5px ; 
+  ancho : 15px ; 
+  alto : 15px ;
+  borde-radio : 50% ; 
+  fondo : var (--clr); 
+  sombra-caja : 0  0  10px  var (--clr), 
+    0  0  40px  var (--clr); 
+} 
+
+/* estilo de reloj digital */ 
+
+#tiempo { 
+  margen-inferior : - 80px ; 
+  pantalla : flex; 
+  transformación : translateY ( 15px ); 
+  relleno : 10px  10px ; 
+  tamaño-fuente : 2em ; 
+  peso-fuente : 600 ; 
+  borde : 2px sólido rgba ( 0 , 0 , 0 , 0.5 ); 
+  borde-radio : 40px ; 
+  box-shadow : 5px  5px  10px  rgba ( 0 , 0 , 0 , 0.5 ), 
+    inserto 5px  5px  20px  rgba ( 255 , 255 , 255 , 0.2 ), 
+    inserto - 5px - 5px  15px  rgba ( 0 , 0 , 0 , 0.75 ); 
+  margen izquierdo : 15px ; 
+} 
+
+#tiempo  div { 
+  posición : relativa; 
+  ancho : 60px ; 
+  alineación del texto : centro; 
+  peso de la fuente : 500 ; 
+  color : var (--clr); 
+} 
+
+#tiempo  div :nth-child ( 1 ) ::after , 
+#tiempo  div :nth-child ( 2 ) ::after { 
+  contenido : ':' ; 
+  posición : absoluta; 
+  derecha : - 4px ; 
+} 
+
+#tiempo  div :last-child { 
+  tamaño-fuente : 0.5em ; 
+  pantalla : flex; 
+  contenido-justificado : centro;
+  align-items : center; 
+  color : #fff ; 
+} 
+
+#time  div :nth-child ( 2 ) ::after { 
+  animation : animate 1s  steps ( 1 ) infinite; 
+} 
+
+@keyframes animate { 
+  0% { 
+    opacity : 1 ; 
+  } 
+
+  50% { 
+    opacity : 0 ; 
+  } 
+} 
+
+/* Hacer responsivo */ 
+
+@media screen and ( max-width : 768px ) { 
+  .container { 
+    border-radius : 10px ; 
+  } 
+
+  .clock { 
+    width : 300px ; 
+    height : 300px ; 
+  } 
+
+  .clock  span { 
+    inset: 15px ; 
+  } 
+
+  .clock  span  b { 
+    font-size : 1.5em ; 
+  } 
+
+  .circle { 
+    width : 200px ; 
+    height : 200px ; 
+  } 
+
+  .circle  i { 
+    altura : 40% ; 
+  } 
+
+  .circle :nth-child ( 1 ) i { 
+    ancho : 1px ; 
+  } 
+
+  .circle :nth-child ( 2 ) i { 
+    ancho : 3px ; 
+  } 
+
+  .circle2 { 
+    ancho : 150px ; 
+    altura : 150px ; 
+  } 
+
+  .circle3 { 
+    ancho : 100px ; 
+    altura : 100px ; 
+  } 
+
+  .circle ::before { 
+    superior : - 6.5px ; 
+    ancho : 10px ; 
+    altura : 10px ; 
+  } 
+} 
+
+@media pantalla y ( ancho máximo : 480px ) { 
+  .container { 
+    radio del borde: 0 ; 
+  } 
+
+  .clock { 
+    ancho : 200px ; 
+    alto : 200px ; 
+  } 
+
+  .clock  span { 
+    recuadro: 10px ; 
+  } 
+
+  .clock  span  b { 
+    tamaño de fuente : 1em ; 
+  } 
+
+  .circle { 
+    ancho : 120px ; 
+    alto : 120px ; 
+  } 
+
+  .circle  i { 
+    alto : 30% ; 
+  } 
+
+  .circle :nth-child ( 1 ) i { 
+    ancho : 1px ; 
+  } 
+
+  .circle :nth-child ( 2 ) i { 
+    ancho : 2px ; 
+  } 
+
+  .circle2 { 
+    ancho : 80px ; 
+    alto : 80px ; 
+  } 
+
+  .circle3 { 
+    ancho : 60px ; 
+    alto : 60px ; 
+  } 
+
+  .circle ::before { 
+    arriba : - 4.5px ; 
+    ancho : 8px ; 
+    alto : 8px ; 
+  } 
+} 
+
+@media pantalla y ( ancho máximo : 768px ) { 
+  #tiempo { 
+    tamaño de fuente : 1.5em ; 
+    relleno : 5px  5px ; 
+    margen izquierdo : 10px ; 
+  } 
+
+  #tiempo  div { 
+    ancho : 50px ; 
+  } 
+
+  #tiempo  div :last-child { 
+    tamaño de fuente : 0.4em ; 
+  } 
+} 
+
+@media pantalla y ( ancho máximo : 480px ) { 
+  #tiempo { 
+    tamaño de fuente : 1em ; 
+    relleno : 2px  2px ; 
+    margen izquierdo : 5px ; 
+  } 
+
+  #tiempo div { 
+    ancho : 40px ; 
+  } 
+
+  #tiempo  div :last-child { 
+    tamaño de fuente : 0.3em ; 
+  } 
+}
