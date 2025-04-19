@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Mini Nutritional Assessment (MNA)</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f8fb;
+      color: #333;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #0066cc;
+    }
+    form {
+      max-width: 900px;
+      margin: auto;
+      background: white;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    .section {
+      margin-bottom: 20px;
+      border-top: 1px solid #ccc;
+      padding-top: 10px;
+    }
+    label, legend {
+      display: block;
+      font-weight: bold;
+      margin-bottom: 5px;
+    }
+    .question {
+      margin-bottom: 15px;
+    }
+    .question span {
+      display: block;
+      font-weight: normal;
+    }
+    input[type="text"], input[type="number"], input[type="date"] {
+      width: 100%;
+      padding: 6px;
+      margin: 5px 0;
+      box-sizing: border-box;
+    }
+    input[type="radio"] {
+      margin-right: 5px;
+    }
+    .result {
+      text-align: center;
+      font-size: 1.2em;
+      font-weight: bold;
+      color: #007a33;
+      margin-top: 10px;
+    }
+    button {
+      padding: 10px 20px;
+      background: #007a33;
+      color: white;
+      border: none;
+      border-radius: 4px;
+      cursor: pointer;
+      margin-right: 10px;
+    }
+    button:hover {
+      background: #005c26;
+    }
+  </style>
+</head>
+<body>
+
+<h1>Mini Nutritional Assessment (MNA)</h1>
+
+<form id="mnaForm">
+  <div class="section">
+    <label>Datos del paciente</label>
+    <input type="text" id="nombre" placeholder="Apellido y nombre" required>
+    <input type="text" id="sexo" placeholder="Sexo">
+    <input type="number" id="edad" placeholder="Edad">
+    <input type="number" id="peso" placeholder="Peso (kg)" step="any" oninput="calcularIMC()">
+    <input type="number" id="altura" placeholder="Altura (cm)" step="any" oninput="calcularIMC()">
+    <input type="date" id="fecha">
+  </div>
+
+  <div class="section">
+    <label>Cribaje</label>
+
+    <div class="question">
+      <label>A. ¿Ha perdido el apetito o ha comido menos en los últimos 3 meses?</label>
+      <span><input type="radio" name="A" value="2"> No</span>
+      <span><input type="radio" name="A" value="1"> Disminución moderada</span>
+      <span><input type="radio" name="A" value="0"> Disminución severa</span>
+    </div>
+
+    <div class="question">
+      <label>B. ¿Ha perdido peso durante los últimos 3 meses?</label>
+      <span><input type="radio" name="B" value="3"> No</span>
+      <span><input type="radio" name="B" value="2"> Pérdida de 1 a 3 kg</span>
+      <span><input type="radio" name="B" value="1"> No lo sabe</span>
+      <span><input type="radio" name="B" value="0"> >3 kg</span>
+    </div>
+
+    <div class="question">
+      <label>C. Movilidad</label>
+      <span><input type="radio" name="C" value="2"> Sale del domicilio</span>
+      <span><input type="radio" name="C" value="1"> Se desplaza dentro</span>
+      <span><input type="radio" name="C" value="0"> Encama o silla</span>
+    </div>
+
+    <div class="question">
+      <label>D. ¿Ha sufrido estrés agudo o enfermedad en los últimos 3 meses?</label>
+      <span><input type="radio" name="D" value="0"> Sí</span>
+      <span><input type="radio" name="D" value="2"> No</span>
+    </div>
+
+    <div class="question">
+      <label>E. Problemas neuropsicológicos</label>
+      <span><input type="radio" name="E" value="2"> Ninguno</span>
+      <span><input type="radio" name="E" value="1"> Depresión leve</span>
+      <span><input type="radio" name="E" value="0"> Demencia o depresión severa</span>
+    </div>
+
+    <div class="question">
+      <label>F. IMC (calculado automáticamente)</label>
+      <span id="imcTexto">IMC: -</span><br>
+      <span><input type="radio" name="F" value="3" id="imc23"> ≥ 23</span>
+      <span><input type="radio" name="F" value="2" id="imc21"> 21–23</span>
+      <span><input type="radio" name="F" value="1" id="imc19"> 19–21</span>
+      <span><input type="radio" name="F" value="0" id="imc0"> &lt; 19</span>
+    </div>
+  </div>
+
+  <div class="section">
+    <button type="button" onclick="calcularMNA()">Calcular Resultado</button>
+    <button type="button" onclick="generarPDF()">Generar PDF</button>
+    <div class="result" id="resultadoMNA"></div>
+  </div>
+</form>
+
+<script>
+  function calcularIMC() {
+    const peso = parseFloat(document.getElementById("peso").value);
+    const altura = parseFloat(document.getElementById("altura").value);
+    if (!peso || !altura) return;
+
+    const imc = peso / Math.pow(altura / 100, 2);
+    document.getElementById("imcTexto").textContent = `IMC: ${imc.toFixed(1)}`;
+
+    // Preselección automática del radio según IMC
+    if (imc >= 23) document.getElementById("imc23").checked = true;
+    else if (imc >= 21) document.getElementById("imc21").checked = true;
+    else if (imc >= 19) document.getElementById("imc19").checked = true;
+    else document.getElementById("imc0").checked = true;
+  }
+
+  function calcularMNA() {
+    let total = 0;
+    const preguntas = ["A", "B", "C", "D", "E", "F"];
+    for (let p of preguntas) {
+      const checked = document.querySelector(`input[name="${p}"]:checked`);
+      if (checked) total += parseInt(checked.value);
+    }
+
+    let resultado = "";
+    if (total >= 12) resultado = "Estado nutricional normal";
+    else if (total >= 8) resultado = "Riesgo de malnutrición";
+    else resultado = "Malnutrición";
+
+    document.getElementById("resultadoMNA").textContent = `Puntaje: ${total} - ${resultado}`;
+  }
+
+  function generarPDF() {
+    const { jsPDF } = window.jspdf;
+    const doc = new jsPDF();
+
+    const nombre = document.getElementById("nombre").value;
+    const sexo = document.getElementById("sexo").value;
+    const edad = document.getElementById("edad").value;
+    const peso = document.getElementById("peso").value;
+    const altura = document.getElementById("altura").value;
+    const fecha = document.getElementById("fecha").value;
+    const resultado = document.getElementById("resultadoMNA").textContent;
+
+    doc.setFontSize(12);
+    doc.text("Mini Nutritional Assessment (MNA)", 10, 10);
+    doc.text(`Nombre: ${nombre}`, 10, 20);
+    doc.text(`Sexo: ${sexo}`, 10, 30);
+    doc.text(`Edad: ${edad}`, 10, 40);
+    doc.text(`Peso: ${peso} kg`, 10, 50);
+    doc.text(`Altura: ${altura} cm`, 10, 60);
+    doc.text(`Fecha: ${fecha}`, 10, 70);
+    doc.text(`Resultado: ${resultado}`, 10, 80);
+
+    doc.save(`MNA_${nombre}.pdf`);
+  }
+</script>
+
+</body>
+</html>
