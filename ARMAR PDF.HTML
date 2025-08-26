@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Fotos/ZIP → PDF (Local, sin servidor)</title>
+  <style>
+    :root{
+      --bg:#0f172a;--panel:#111827;--soft:#1f2937;--text:#e5e7eb;--muted:#9ca3af;--brand:#22c55e;--warn:#f59e0b;--err:#ef4444
+    }
+    *{box-sizing:border-box}
+    body{margin:0;background:linear-gradient(180deg,#0b1220,#111827 20%,#0b1220 100%);font-family:system-ui,-apple-system,Segoe UI,Roboto,Ubuntu,Cantarell,Noto Sans,sans-serif;color:var(--text)}
+    .wrap{max-width:980px;margin:24px auto;padding:16px}
+    .card{background:rgba(17,24,39,.7);backdrop-filter:blur(6px);border:1px solid rgba(255,255,255,.06);border-radius:16px;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+    header{padding:20px 24px;border-bottom:1px solid rgba(255,255,255,.06)}
+    header h1{margin:0;font-size:20px}
+    header p{margin:6px 0 0;color:var(--muted);font-size:14px}
+    .content{padding:18px 24px}
+
+    .grid{display:grid;grid-template-columns:1fr 320px;gap:16px}
+    @media (max-width:900px){.grid{grid-template-columns:1fr}}
+
+    .drop{border:2px dashed rgba(255,255,255,.18);border-radius:14px;padding:22px;text-align:center;background:rgba(255,255,255,.03)}
+    .drop.drag{border-color:var(--brand);background:rgba(34,197,94,.08)}
+    .drop input{display:none}
+    .drop .hint{color:var(--muted);font-size:14px}
+
+    .btn{appearance:none;border:none;border-radius:12px;padding:12px 16px;cursor:pointer;font-weight:600}
+    .btn.primary{background:var(--brand);color:#0b1220}
+    .btn.soft{background:var(--soft);color:var(--text)}
+    .btn:disabled{opacity:.6;cursor:not-allowed}
+
+    .row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+    .row > *{flex:1}
+    .row label{flex:0 0 150px;color:var(--muted);font-size:14px}
+    input[type="text"], select, input[type="number"]{width:100%;background:#0b1220;border:1px solid rgba(255,255,255,.12);color:var(--text);padding:10px 12px;border-radius:10px}
+
+    .thumbs{display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:8px;margin-top:12px;max-height:240px;overflow:auto}
+    .thumb{background:#0b1220;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:6px;font-size:11px;color:var(--muted)}
+    .thumb img{width:100%;height:90px;object-fit:cover;border-radius:6px;margin-bottom:4px}
+
+    .progress{height:10px;border-radius:999px;background:#0b1220;border:1px solid rgba(255,255,255,.12);overflow:hidden}
+    .bar{height:100%;width:0;background:var(--brand);transition:width .2s ease}
+
+    .log{font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,"Liberation Mono","Courier New",monospace;background:#0b1220;border:1px solid rgba(255,255,255,.08);border-radius:10px;padding:10px;color:#cbd5e1;max-height:160px;overflow:auto}
+    .muted{color:var(--muted)}
+    .small{font-size:12px}
+    .danger{color:var(--err)}
+    .ok{color:var(--brand)}
+  </style>
+  <!-- Librerías desde CDN, solo cuando lo abras en tu navegador → funcionan offline si ya están cacheadas -->
+  <script src="https://cdn.jsdelivr.net/npm/jszip@3.10.1/dist/jszip.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/pdf-lib@1.17.1/dist/pdf-lib.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/exifr@7.1.3/dist/full.umd.js"></script>
+</head>
+<body>
+  <div class="wrap">
+    <div class="card">
+      <header>
+        <h1>Fotos o ZIP → PDF único (100% local)</h1>
+        <p>Subí un <b>ZIP con fotos</b> o varias <b>imágenes</b>. Se crea un solo PDF, ordenado y con tamaño A4. Todo se hace <b>en tu navegador</b>, sin subir nada.</p>
+      </header>
+      <div class="content grid">
+        <section>
+          <div id="drop" class="drop">
+            <p style="margin:0 0 8px">Arrastrá y soltá archivos acá</p>
+            <p class="hint">Acepta: <b>.zip</b>, <b>.jpg</b>, <b>.jpeg</b>, <b>.png</b>, <b>.webp</b> (HEIC no soportado por navegadores)</p>
+            <div style="margin-top:12px">
+              <label class="btn soft" for="fileInput">Elegir archivos</label>
+              <input id="fileInput" type="file" multiple accept=".zip,image/*" />
+            </div>
+          </div>
+
+          <div style="margin-top:16px" class="row">
+            <label>Paciente</label>
+            <input id="paciente" type="text" placeholder="Apellido_Nombre" />
+          </div>
+          <div class="row">
+            <label>Fecha</label>
+            <input id="fecha" type="text" placeholder="AAAA-MM-DD" />
+          </div>
+          <div class="row">
+            <label>Tamaño de página</label>
+            <select id="pageSize">
+              <option value="A4" selected>A4 (210×297 mm)</option>
+              <option value="LETTER">Carta (8.5×11 in)</option>
+            </select>
+          </div>
+          <div class="row">
+            <label>Margen (mm)</label>
+            <input id="margin" type="number" min="0" max="30" step="1" value="10" />
+          </div>
+          <div class="row">
+            <label>Orden</label>
+            <select id="ordering">
+              <option value="name" selected>Por nombre (A→Z)</option>
+              <option value="time">Por fecha EXIF (si existe)</option>
+            </select>
+          </div>
+
+          <div style="margin:14px 0" class="progress"><div id="bar" class="bar"></div></div>
+          <div id="status" class="small muted">Sin archivos cargados.</div>
+
+          <div class="thumbs" id="thumbs"></div>
+
+          <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+            <button id="build" class="btn primary" disabled>Generar PDF</button>
+            <a id="download" class="btn soft" style="display:none" download>Descargar PDF</a>
+          </div>
+
+          <p class="small muted" style="margin-top:12px">Consejos: poné nombres tipo <code>001.jpg, 002.jpg, ...</code> para un orden perfecto. Si una foto sale girada, el sistema intenta leer EXIF y rotar automáticamente.</p>
+        </section>
+
+        <aside>
+          <div class="card" style="padding:14px">
+            <h3 style="margin:6px 0 8px">Registro</h3>
+            <div id="log" class="log small"></div>
+            <p class="small muted" style="margin-top:10px">Todo el procesamiento se realiza localmente en tu PC. No hay servidor.</p>
+          </div>
+        </aside>
+      </div>
+    </div>
+  </div>
+
+<script>
+(function(){
+  const drop = document.getElementById('drop');
+  const fileInput = document.getElementById('fileInput');
+  const buildBtn = document.getElementById('build');
+  const dlBtn = document.getElementById('download');
+  const thumbs = document.getElementById('thumbs');
+  const statusEl = document.getElementById('status');
+  const bar = document.getElementById('bar');
+  const logEl = document.getElementById('log');
+  const pacienteEl = document.getElementById('paciente');
+  const fechaEl = document.getElementById('fecha');
+  const pageSizeEl = document.getElementById('pageSize');
+  const marginEl = document.getElementById('margin');
+  const orderingEl = document.getElementById('ordering');
+
+  const SIZES = {
+    A4: { wpt: 595.28, hpt: 841.89 },
+    LETTER: { wpt: 612, hpt: 792 }
+  };
+
+  function today(){
+    const d=new Date();
+    const m=(d.getMonth()+1).toString().padStart(2,'0');
+    const day=d.getDate().toString().padStart(2,'0');
+    return `${d.getFullYear()}-${m}-${day}`;
+  }
+  fechaEl.value = today();
+
+  let picked = [];
+
+  function log(msg, cls){
+    const p=document.createElement('div');
+    p.textContent = msg;
+    if(cls) p.classList.add(cls);
+    logEl.appendChild(p);
+    logEl.scrollTop = logEl.scrollHeight;
+  }
+
+  function setProgress(p){ bar.style.width = `${Math.max(0,Math.min(100,p))}%`; }
+
+  function humanSize(bytes){
+    const units=['B','KB','MB','GB'];
+    let i=0, n=bytes;
+    while(n>=1024 && i<units.length-1){ n/=1024; i++; }
+    return `${n.toFixed(1)} ${units[i]}`;
+  }
+
+  function clearState(){
+    picked = [];
+    thumbs.innerHTML='';
+    statusEl.textContent='Sin archivos cargados.';
+    setProgress(0);
+    buildBtn.disabled = true;
+    dlBtn.style.display='none';
+    dlBtn.removeAttribute('href');
+  }
+
+  async function readAsArrayBuffer(file){
+    return new Promise((res,rej)=>{ const r=new FileReader(); r.onload=()=>res(r.result); r.onerror=rej; r.readAsArrayBuffer(file); });
+  }
+
+  function addThumb(file, url){
+    const d=document.createElement('div'); d.className='thumb';
+    const img=document.createElement('img'); img.src=url;
+    const name=document.createElement('div'); name.textContent=file.name;
+    const size=document.createElement('div'); size.textContent=humanSize(file.size);
+    d.appendChild(img); d.appendChild(name); d.appendChild(size);
+    thumbs.appendChild(d);
+  }
+
+  function accept(file){
+    const name = file.name.toLowerCase();
+    return name.endsWith('.zip') || name.match(/\.(jpg|jpeg|png|webp)$/);
+  }
+
+  async function collectFiles(fileList){
+    clearState();
+    const files = Array.from(fileList).filter(accept);
+    if(files.length===0){ log('No se detectaron archivos válidos.', 'danger'); return; }
+
+    // Si hay un único ZIP, lo expandimos
+    const zips = files.filter(f=>f.name.toLowerCase().endsWith('.zip'));
+    const images = files.filter(f=>!f.name.toLowerCase().endsWith('.zip'));
+
+    if(zips.length>0){
+      for(const zipFile of zips){
+        log(`Leyendo ZIP: ${zipFile.name} (${humanSize(zipFile.size)})`);
+        const ab = await readAsArrayBuffer(zipFile);
+        const zip = await JSZip.loadAsync(ab);
+        const entries = [];
+        zip.forEach((path, entry)=>{ entries.push(entry); });
+        log(`Encontrados ${entries.length} elementos en el ZIP.`);
+
+        for(const entry of entries){
+          if(entry.dir) continue;
+          const lower = entry.name.toLowerCase();
+          if(!lower.match(/\.(jpg|jpeg|png|webp)$/)) continue; // sólo imágenes
+          const blob = await entry.async('blob');
+          const file = new File([blob], entry.name.split('/').pop(), { type: blob.type || 'image/jpeg' });
+          picked.push(file);
+        }
+      }
+    }
+
+    // Agregamos imágenes sueltas
+    picked.push(...images);
+
+    if(picked.length===0){ log('No se encontraron imágenes válidas.', 'danger'); return; }
+
+    // Orden preliminar por nombre
+    picked.sort((a,b)=>a.name.localeCompare(b.name, undefined, {numeric:true, sensitivity:'base'}));
+
+    // Previews
+    for(const f of picked){
+      const url = URL.createObjectURL(f);
+      addThumb(f,url);
+    }
+
+    statusEl.textContent = `${picked.length} imagen(es) listas.`;
+    buildBtn.disabled = false;
+    log(`Total imágenes: ${picked.length}`, 'ok');
+  }
+
+  drop.addEventListener('dragover', e=>{ e.preventDefault(); drop.classList.add('drag'); });
+  drop.addEventListener('dragleave', ()=>drop.classList.remove('drag'));
+  drop.addEventListener('drop', e=>{ e.preventDefault(); drop.classList.remove('drag'); collectFiles(e.dataTransfer.files); fileInput.value=''; });
+  fileInput.addEventListener('change', e=>{ collectFiles(e.target.files); });
+
+  async function getExifDate(file){
+    try{
+      const exif = await exifr.parse(file, { translateValues:false, tiff:true, ifd0:true, exif:true });
+      const dt = exif && (exif.DateTimeOriginal || exif.CreateDate || exif.ModifyDate);
+      return dt ? new Date(dt) : null;
+    }catch(_){ return null; }
+  }
+
+  async function getExifOrientation(file){
+    try{
+      const o = await exifr.orientation(file);
+      return o || 1;
+    }catch(_){ return 1; }
+  }
+
+  function mmToPt(mm){ return mm * 72 / 25.4; }
+
+  async function imageToCanvas(file, maxW, maxH, rotateDeg){
+    return new Promise((resolve, reject)=>{
+      const img = new Image();
+      img.onload = ()=>{
+        const canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        let w = img.naturalWidth, h = img.naturalHeight;
+
+        // Rotación si corresponde
+        let rad = (rotateDeg || 0) * Math.PI/180;
+        // Ajuste de lienzo si hay rotación de 90/270
+        const rotate90 = Math.abs((rotateDeg||0)) % 180 === 90;
+        const cw = rotate90 ? h : w;
+        const ch = rotate90 ? w : h;
+
+        // Escalado para caber en maxW x maxH
+        const scale = Math.min(maxW / cw, maxH / ch, 1);
+        const dw = Math.round(cw * scale);
+        const dh = Math.round(ch * scale);
+
+        canvas.width = dw; canvas.height = dh;
+        ctx.save();
+        // trasladar al centro y rotar
+        ctx.translate(dw/2, dh/2);
+        ctx.rotate(rad);
+        const drawW = rotate90 ? dh : dw;
+        const drawH = rotate90 ? dw : dh;
+        ctx.drawImage(img, -drawW/2, -drawH/2, drawW, drawH);
+        ctx.restore();
+
+        // Compresión a ~85% calidad para JPG
+        canvas.toBlob(b=>{
+          resolve({blob:b, width:dw, height:dh});
+        }, 'image/jpeg', 0.85);
+      };
+      img.onerror = reject;
+      img.src = URL.createObjectURL(file);
+    });
+  }
+
+  async function buildPDF(){
+    if(picked.length===0) return;
+    buildBtn.disabled = true; setProgress(2); log('Preparando PDF...');
+
+    // Orden final si el usuario lo pide por EXIF
+    if(orderingEl.value === 'time'){
+      log('Leyendo fechas EXIF para ordenar...', 'muted');
+      const withDates = await Promise.all(picked.map(async f=>({ file:f, date: await getExifDate(f) })));
+      withDates.sort((a,b)=>{
+        if(a.date && b.date) return a.date - b.date;
+        if(a.date) return -1; if(b.date) return 1; // las que tienen fecha primero
+        return a.file.name.localeCompare(b.file.name, undefined, {numeric:true, sensitivity:'base'});
+      });
+      picked = withDates.map(x=>x.file);
+    }
+
+    const { PDFDocument, StandardFonts } = PDFLib;
+    const pdfDoc = await PDFDocument.create();
+
+    const sizeKey = pageSizeEl.value;
+    const base = SIZES[sizeKey];
+    const marginPt = mmToPt(parseFloat(marginEl.value)||0);
+
+    let done = 0;
+
+    for(const file of picked){
+      setProgress(5 + (done/picked.length)*80);
+
+      const orientation = await getExifOrientation(file);
+      // Mapear orientación EXIF a grados
+      const orient2deg = { 1:0, 3:180, 6:90, 8:-90 };
+      const rotateDeg = orient2deg[orientation] || 0;
+
+      // Para decidir orientación de la página, miramos dimensiones originales (considerando rotación)
+      const img = await new Promise((res,rej)=>{ const im=new Image(); im.onload=()=>res(im); im.onerror=rej; im.src=URL.createObjectURL(file); });
+      const iw = img.naturalWidth, ih = img.naturalHeight;
+      const rot90 = Math.abs(rotateDeg)%180===90;
+      const rw = rot90 ? ih : iw; // width after rotation
+      const rh = rot90 ? iw : ih; // height after rotation
+
+      const landscape = rw >= rh;
+      const pageW = landscape ? base.hpt : base.wpt; // swap if landscape
+      const pageH = landscape ? base.wpt : base.hpt;
+
+      const maxW = pageW - marginPt*2;
+      const maxH = pageH - marginPt*2;
+
+      // Reescalar en canvas para bajar peso y aplicar rotación
+      const { blob, width, height } = await imageToCanvas(file, maxW, maxH, rotateDeg);
+      const imgBytes = new Uint8Array(await blob.arrayBuffer());
+      const embed = await pdfDoc.embedJpg(imgBytes);
+
+      const page = pdfDoc.addPage([pageW, pageH]);
+      const scale = Math.min(maxW / width, maxH / height, 1);
+      const drawW = width * scale;
+      const drawH = height * scale;
+      const x = (pageW - drawW)/2;
+      const y = (pageH - drawH)/2;
+
+      page.drawImage(embed, { x, y, width: drawW, height: drawH });
+      done++;
+    }
+
+    setProgress(92);
+    const pdfBytes = await pdfDoc.save();
+
+    const paciente = (pacienteEl.value||'Paciente').replace(/\s+/g,'_');
+    const fecha = (fechaEl.value||today()).replace(/\//g,'-');
+    const filename = `${paciente}_${fecha}.pdf`;
+
+    const blob = new Blob([pdfBytes], { type:'application/pdf' });
+    const url = URL.createObjectURL(blob);
+
+    dlBtn.href = url;
+    dlBtn.download = filename;
+    dlBtn.style.display = 'inline-block';
+
+    setProgress(100); log('PDF generado con éxito.', 'ok');
+    statusEl.textContent = `Listo: ${filename}`;
+    buildBtn.disabled = false;
+  }
+
+  buildBtn.addEventListener('click', buildPDF);
+
+  // Habilitar botón cuando haya archivos
+  thumbs.addEventListener('DOMNodeInserted', ()=>{
+    buildBtn.disabled = (picked.length===0);
+  });
+})();
+</script>
+</body>
+</html>
