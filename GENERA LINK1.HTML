@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Generador simple de href</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; }
+    input { margin: 5px; padding: 5px; }
+    button { padding: 6px 12px; margin: 5px; }
+    textarea { width: 100%; height: 120px; margin-top: 10px; font-family: monospace; }
+    #preview { margin-top: 15px; padding: 10px; border: 1px solid #ccc; }
+  </style>
+</head>
+<body>
+  <h2>Generador de enlaces &lt;a href&gt;</h2>
+  
+  <label>Link: <input type="text" id="link" placeholder="https://..."></label><br>
+  <label>Texto: <input type="text" id="texto" placeholder="Texto visible"></label><br>
+  
+  <button onclick="generar()">Generar</button>
+  <button onclick="limpiar()">Limpiar</button>
+  
+  <h3>Código generado:</h3>
+  <textarea id="resultado" readonly></textarea>
+  
+  <h3>Vista previa:</h3>
+  <div id="preview"></div>
+
+  <script>
+    function generar() {
+      const link = document.getElementById("link").value;
+      const texto = document.getElementById("texto").value;
+      if (link && texto) {
+        const codigo = `<a href="${link}" target="_blank">${texto}</a><br>\n`;
+        document.getElementById("resultado").value += codigo;
+        document.getElementById("preview").innerHTML += codigo;
+      }
+    }
+
+    function limpiar() {
+      document.getElementById("resultado").value = "";
+      document.getElementById("preview").innerHTML = "";
+    }
+  </script>
+</body>
+</html>
