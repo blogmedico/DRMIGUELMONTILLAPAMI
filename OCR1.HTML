@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>OCR Local con Tesseract.js</title>
+  <script src="https://cdn.jsdelivr.net/npm/tesseract.js@4/dist/tesseract.min.js"></script>
+</head>
+<body>
+  <h2>OCR de Capturas de Pantalla (Lista con &lt;br&gt; literal)</h2>
+
+  <!-- Espacio para nombre del paciente -->
+  <label for="nombrePaciente">Nombre del paciente:</label><br>
+  <input type="text" id="nombrePaciente" style="width:90%; margin-bottom:15px;"><br>
+
+  <!-- Selector de imagen -->
+  <input type="file" id="imagenInput" accept="image/*"><br><br>
+
+  <!-- Botón de procesar -->
+  <button id="procesarBtn">Procesar Imagen</button>
+  <button id="copiarBtn">Copiar al portapapeles</button><br><br>
+
+  <!-- Resultado en textarea para copiar -->
+  <textarea id="resultado" style="width:90%; height:250px;"></textarea>
+
+  <script>
+    const imagenInput = document.getElementById('imagenInput');
+    const procesarBtn = document.getElementById('procesarBtn');
+    const copiarBtn = document.getElementById('copiarBtn');
+    const resultado = document.getElementById('resultado');
+    const nombrePaciente = document.getElementById('nombrePaciente');
+
+    procesarBtn.addEventListener('click', () => {
+      if (!imagenInput.files[0]) {
+        alert('Seleccioná una imagen primero');
+        return;
+      }
+
+      resultado.value = "Procesando OCR...";
+
+      Tesseract.recognize(
+        imagenInput.files[0],
+        'spa', // Español
+        { logger: m => console.log(m) }
+      ).then(({ data: { text } }) => {
+        // Texto limpio con <br> literal
+        const textoConBr = text.split('\n')
+                               .map(line => line.trim())
+                               .filter(line => line)
+                               .join('<br>\n');
+
+        // Si hay nombre del paciente, lo agregamos arriba
+        const nombre = nombrePaciente.value.trim();
+        if (nombre) {
+          resultado.value = nombre + '<br>\n' + textoConBr;
+        } else {
+          resultado.value = textoConBr;
+        }
+      }).catch(err => {
+        resultado.value = "Error: " + err;
+      });
+    });
+
+    copiarBtn.addEventListener('click', () => {
+      resultado.select();
+      resultado.setSelectionRange(0, 99999); // Para móviles
+      navigator.clipboard.writeText(resultado.value)
+        .then(() => alert("Copiado al portapapeles ✅"))
+        .catch(err => alert("Error al copiar: " + err));
+    });
+  </script>
+</body>
+</html>
