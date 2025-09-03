@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <title>Mini Backend Local</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f0f8ff;
+      padding: 20px;
+    }
+    h2 { color: #003366; }
+    .card {
+      background: #fff;
+      padding: 15px;
+      border-radius: 10px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+      margin-bottom: 20px;
+    }
+    input, button {
+      padding: 6px;
+      margin: 5px 0;
+    }
+    a {
+      display: inline-block;
+      margin: 4px 0;
+      color: #0066cc;
+      text-decoration: none;
+    }
+    .small-btn {
+      background: #ff4d4d;
+      color: white;
+      border: none;
+      padding: 3px 6px;
+      margin-left: 8px;
+      cursor: pointer;
+      border-radius: 5px;
+      font-size: 12px;
+    }
+    .orange-btn {
+      background: #ffa500;
+      color: white;
+      border: none;
+      padding: 6px 10px;
+      margin: 5px;
+      cursor: pointer;
+      border-radius: 6px;
+    }
+    #buscador {
+      width: 100%;
+      padding: 8px;
+      margin-bottom: 15px;
+      border-radius: 6px;
+      border: 1px solid #ccc;
+    }
+  </style>
+</head>
+<body>
+  <h2>Gestor Simple de Pacientes</h2>
+
+  <div class="card">
+    <label>Nombre y Apellido:</label><br>
+    <input type="text" id="nombre"><br>
+    
+    <label>DNI:</label><br>
+    <input type="text" id="dni"><br>
+    
+    <label>Agregar link:</label><br>
+    <input type="text" id="link" placeholder="C:\MiCarpeta\archivo.pdf"><br>
+    
+    <button onclick="guardar()">Guardar/Actualizar</button>
+  </div>
+
+  <h3>Pacientes Guardados</h3>
+  <input type="text" id="buscador" placeholder="Buscar por DNI o Nombre..." onkeyup="mostrar(this.value)">
+  
+  <div>
+    <button class="orange-btn" onclick="exportar()">Exportar JSON</button>
+    <input type="file" id="importarFile" onchange="importar(event)" style="display:none">
+    <button class="orange-btn" onclick="document.getElementById('importarFile').click()">Importar JSON</button>
+  </div>
+
+  <div id="lista"></div>
+
+  <script>
+    function guardar() {
+      let nombre = document.getElementById("nombre").value;
+      let dni = document.getElementById("dni").value;
+      let link = document.getElementById("link").value;
+
+      if (!nombre || !dni) {
+        alert("Nombre y DNI son obligatorios");
+        return;
+      }
+
+      let pacientes = JSON.parse(localStorage.getItem("pacientes")) || {};
+
+      if (!pacientes[dni]) {
+        pacientes[dni] = { nombre: nombre, links: [] };
+      } else {
+        pacientes[dni].nombre = nombre; // actualizar nombre
+      }
+
+      if (link) {
+        pacientes[dni].links.push(link);
+      }
+
+      localStorage.setItem("pacientes", JSON.stringify(pacientes));
+      mostrar();
+      document.getElementById("link").value = "";
+    }
+
+    function eliminarPaciente(dni) {
+      let pacientes = JSON.parse(localStorage.getItem("pacientes")) || {};
+      delete pacientes[dni];
+      localStorage.setItem("pacientes", JSON.stringify(pacientes));
+      mostrar();
+    }
+
+    function eliminarLink(dni, index) {
+      let pacientes = JSON.parse(localStorage.getItem("pacientes")) || {};
+      pacientes[dni].links.splice(index, 1);
+      localStorage.setItem("pacientes", JSON.stringify(pacientes));
+      mostrar();
+    }
+
+    function mostrar(filtro="") {
+      let pacientes = JSON.parse(localStorage.getItem("pacientes")) || {};
+      let lista = document.getElementById("lista");
+      lista.innerHTML = "";
+
+      filtro = filtro.toLowerCase();
+
+      for (let dni in pacientes) {
+        let nombre = pacientes[dni].nombre.toLowerCase();
+
+        if (dni.includes(filtro) || nombre.includes(filtro)) {
+          let div = document.createElement("div");
+          div.className = "card";
+          div.innerHTML = `<b>${pacientes[dni].nombre}</b> - DNI: ${dni}<br><br>`;
+
+          pacientes[dni].links.forEach((l, i) => {
+            div.innerHTML += `
+              <a href="file:///${l}" target="_blank">${l}</a>
+              <button class="small-btn" onclick="eliminarLink('${dni}', ${i})">X</button><br>
+            `;
+          });
+
+          div.innerHTML += `<br>
+            <button class="small-btn" onclick="eliminarPaciente('${dni}')">Eliminar Paciente</button>
+          `;
+
+          lista.appendChild(div);
+        }
+      }
+    }
+
+    function exportar() {
+      let pacientes = localStorage.getItem("pacientes");
+      if (!pacientes) {
+        alert("No hay datos para exportar");
+        return;
+      }
+
+      let blob = new Blob([pacientes], { type: "application/json" });
+      let url = URL.createObjectURL(blob);
+      let a = document.createElement("a");
+      a.href = url;
+      a.download = "pacientes.json";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function importar(event) {
+      let file = event.target.files[0];
+      if (!file) return;
+
+      let reader = new FileReader();
+      reader.onload = function(e) {
+        try {
+          let data = JSON.parse(e.target.result);
+          localStorage.setItem("pacientes", JSON.stringify(data));
+          mostrar();
+          alert("Datos importados correctamente");
+        } catch (err) {
+          alert("Error al importar JSON");
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    mostrar();
+  </script>
+</body>
+</html>
