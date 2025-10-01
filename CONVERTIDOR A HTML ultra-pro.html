@@ -1,0 +1,407 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Constructor de Libro · NotebookLM → HTML</title>
+<style>
+  :root{--bg:#f5f8fb;--card:#fff;--accent:#0b6b8a;--muted:#5b6b6f}
+  *{box-sizing:border-box} body{font-family:Inter,system-ui,-apple-system,Segoe UI,Roboto,Arial;background:var(--bg);margin:0;color:#041018}
+  header{background:linear-gradient(90deg,#eaf6fa,#fbfeff);padding:14px;border-bottom:1px solid rgba(11,107,138,.06)}
+  .wrap{max-width:1200px;margin:18px auto;padding:0 16px}
+  h1{margin:0;color:var(--accent);font-size:20px}
+  .grid{display:grid;grid-template-columns:360px 1fr;gap:16px;margin-top:14px}
+  .card{background:var(--card);padding:12px;border-radius:10px;box-shadow:0 8px 28px rgba(2,6,8,0.04)}
+  label{display:block;font-weight:700;margin-bottom:6px}
+  input[type=file]{width:100%}
+  textarea{width:100%;min-height:90px;padding:8px;border-radius:8px;border:1px solid #e6eef2;resize:vertical}
+  .controls{display:flex;gap:8px;flex-wrap:wrap;margin-top:8px}
+  button{background:var(--accent);border:none;color:#fff;padding:8px 12px;border-radius:8px;cursor:pointer}
+  button.secondary{background:#eef7fa;color:var(--accent);border:1px solid rgba(11,107,138,0.08)}
+  .small{font-size:13px;color:var(--muted)}
+  .preview{min-height:480px;overflow:auto;padding:18px;border-radius:8px;border:1px solid rgba(11,26,33,0.04);background:#fff}
+  .toc{margin-bottom:12px;padding:8px;border-radius:6px;background:#fbfeff;border:1px solid rgba(11,107,138,0.04)}
+  .section-list{max-height:220px;overflow:auto;margin-top:8px;border-radius:6px;border:1px dashed rgba(11,26,33,0.04);padding:8px}
+  .section-item{display:flex;align-items:flex-start;gap:8px;padding:6px;border-bottom:1px solid rgba(2,6,8,0.03)}
+  .section-item:last-child{border-bottom:none}
+  .sec-actions{margin-left:auto;display:flex;gap:6px}
+  .book-title{font-family:Georgia,serif;color:#072431}
+  /* output styling (book-like) */
+  .book{font-family:Georgia, 'Times New Roman', serif;color:#072431;max-width:900px;margin:0 auto}
+  .book h1{font-size:28px;color:var(--accent);margin:10px 0}
+  .book h2{font-size:20px;color:#0b4a6f;margin:8px 0}
+  .book p{margin:8px 0;line-height:1.5;orphans:3;widows:3}
+  .book img{max-width:100%;height:auto;display:block;margin:12px 0;border-radius:6px}
+  .modal{position:fixed;left:0;top:0;right:0;bottom:0;background:rgba(2,6,8,0.5);display:flex;align-items:center;justify-content:center;padding:16px;z-index:999}
+  .modal .card{width:100%;max-width:880px}
+  .meta{font-size:12px;color:var(--muted);margin-bottom:10px}
+  footer{max-width:1200px;margin:18px auto;padding:12px 16px;color:var(--muted);font-size:13px}
+  @media(max-width:900px){.grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Constructor de Libro · NotebookLM → HTML</h1>
+    <div class="small">Subí textos e imágenes, reordená y editá secciones, genera índice automático e descargá un HTML totalmente portable.</div>
+  </div>
+</header>
+
+<main class="wrap">
+  <div class="grid">
+    <aside>
+      <div class="card">
+        <label for="file">1) Subí archivos (arrastrar/soltar)</label>
+        <input id="file" type="file" multiple accept=".md,.markdown,.txt,.html,.htm,.docx,.pdf,image/*">
+        <div style="margin-top:10px">
+          <label for="paste">2) O pegá contenido (Markdown / Texto / HTML)</label>
+          <textarea id="paste" placeholder="Pega aquí texto de NotebookLM..."></textarea>
+          <div class="controls" style="margin-top:8px">
+            <button id="btnPaste">Agregar pegado</button>
+            <button id="btnClear" class="secondary">Borrar todo</button>
+          </div>
+        </div>
+
+        <div style="margin-top:12px">
+          <label>Opciones</label>
+          <div class="small" style="margin-bottom:6px">Las imágenes se insertan **entre** los textos en el orden de subida. Podés reordenar luego.</div>
+          <label class="small"><input id="optResize" type="checkbox" checked> Redimensionar imágenes grandes (&gt;1000px)</label>
+        </div>
+
+        <div style="margin-top:12px">
+          <label>Secciones (reordená / editá)</label>
+          <div class="section-list" id="sectionList"></div>
+        </div>
+
+        <div style="margin-top:12px;display:flex;gap:8px">
+          <button id="btnBuild">Generar vista previa & TOC</button>
+          <button id="btnDownload" class="secondary">Descargar libro (todo incluido)</button>
+        </div>
+        <div id="status" class="small" style="margin-top:8px;color:var(--muted)"></div>
+      </div>
+    </aside>
+
+    <section>
+      <div class="card preview">
+        <div id="previewInner" class="preview">
+          <div class="small" style="color:var(--muted)">Aún no hay contenido. Agregá secciones subiendo archivos o pegando texto.</div>
+        </div>
+      </div>
+    </section>
+  </div>
+</main>
+
+<!-- Modal editor -->
+<div id="modal" class="modal" style="display:none">
+  <div class="card">
+    <label>Editar sección: <span id="modalTitle" class="small"></span></label>
+    <textarea id="modalArea" style="min-height:220px"></textarea>
+    <div style="display:flex;gap:8px;margin-top:8px">
+      <button id="modalSave">Guardar</button>
+      <button id="modalCancel" class="secondary">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<footer>
+  <div class="small">Hecho para Dr. Montilla — Libro portable con imágenes incrustadas. Si querés PDF final también, lo agrego.</div>
+</footer>
+
+<!-- Dependencias -->
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<script src="https://unpkg.com/mammoth/mammoth.browser.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.7.107/pdf.min.js"></script>
+
+<script>
+/* ----------------- Variables y DOM ----------------- */
+const fileInput = document.getElementById('file');
+const pasteBox = document.getElementById('paste');
+const btnPaste = document.getElementById('btnPaste');
+const btnClear = document.getElementById('btnClear');
+const btnBuild = document.getElementById('btnBuild');
+const btnDownload = document.getElementById('btnDownload');
+const optResize = document.getElementById('optResize');
+const previewInner = document.getElementById('previewInner');
+const sectionList = document.getElementById('sectionList');
+const status = document.getElementById('status');
+
+const modal = document.getElementById('modal');
+const modalTitle = document.getElementById('modalTitle');
+const modalArea = document.getElementById('modalArea');
+const modalSave = document.getElementById('modalSave');
+const modalCancel = document.getElementById('modalCancel');
+
+let sections = []; // {id, name, html, rawText}
+let queuedFiles = [];
+let editingId = null;
+
+/* pdf.js worker */
+if(window.pdfjsLib && !pdfjsLib.GlobalWorkerOptions.workerSrc){
+  pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/3.7.107/pdf.worker.min.js';
+}
+
+/* -------------- Utilidades -------------- */
+function uid(){ return Math.random().toString(36).slice(2,9); }
+function setStatus(s){ status.textContent = s; }
+function escapeHtml(s){ return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+
+/* Resize image via canvas -> DataURL */
+async function resizeImage(file,maxDim=1000){
+  return new Promise((res,rej)=>{
+    const fr = new FileReader();
+    fr.onload = () => {
+      const img = new Image();
+      img.onload = () => {
+        let w = img.width, h = img.height;
+        const max = Math.max(w,h);
+        if(max <= maxDim){ res(fr.result); return; }
+        const scale = maxDim / max;
+        const canvas = document.createElement('canvas');
+        canvas.width = Math.round(w*scale);
+        canvas.height = Math.round(h*scale);
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img,0,0,canvas.width,canvas.height);
+        canvas.toBlob(blob=>{
+          const rfr = new FileReader();
+          rfr.onload = ()=> res(rfr.result);
+          rfr.readAsDataURL(blob);
+        }, 'image/jpeg', 0.78);
+      };
+      img.onerror = e=> rej(e);
+      img.src = fr.result;
+    };
+    fr.onerror = e=> rej(e);
+    fr.readAsDataURL(file);
+  });
+}
+
+/* -------------- Procesado de archivos -------------- */
+fileInput.addEventListener('change', e=>{
+  queuedFiles = Array.from(e.target.files);
+  setStatus(queuedFiles.length + ' archivo(s) listos. Pulsá "Generar vista previa" para procesarlos.');
+});
+
+btnPaste.addEventListener('click', ()=>{
+  const txt = pasteBox.value.trim();
+  if(!txt){ alert('Pegá algo primero.'); return; }
+  // convertir inmediatamente y agregar sección
+  const html = convertTextOrMarkdown(txt);
+  addSection({name:'Pegado', html, rawText: txt});
+  pasteBox.value = '';
+  setStatus('Sección agregada desde pegado.');
+  renderSectionList();
+});
+
+btnClear.addEventListener('click', ()=>{
+  if(!confirm('Borrar todo el contenido y secciones?')) return;
+  sections = []; queuedFiles = []; fileInput.value = ''; previewInner.innerHTML = '<div class="small" style="color:#5b6b6f">Aún no hay contenido.</div>'; renderSectionList(); setStatus('Todo borrado.');
+});
+
+/* Procesa los archivos en la cola y los convierte en secciones (en orden) */
+async function processQueuedFiles(){
+  if(!queuedFiles.length) return;
+  setStatus('Procesando ' + queuedFiles.length + ' archivo(s)...');
+  for(let file of queuedFiles){
+    const s = await processFile(file);
+    // añadir como seccion
+    addSection({name: s.name, html: s.html, rawText: s.raw || ''});
+  }
+  queuedFiles = [];
+  fileInput.value = '';
+  setStatus('Archivos procesados y agregados como secciones.');
+}
+
+/* Process single File to html (text, md, docx, pdf, image) */
+async function processFile(file){
+  const name = file.name || 'sin-nombre';
+  const suf = (file.name || '').split('.').pop().toLowerCase();
+  // text-like
+  if(file.type.startsWith('text/') || ['txt','md','markdown','csv'].includes(suf)){
+    const txt = await file.text();
+    return {name, html: convertTextOrMarkdown(txt), raw: txt};
+  }
+  // html
+  if(file.type === 'text/html' || ['html','htm'].includes(suf)){
+    const txt = await file.text();
+    return {name, html: txt, raw: txt};
+  }
+  // docx
+  if(['docx'].includes(suf) || file.type === 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'){
+    try{
+      const ab = await file.arrayBuffer();
+      const result = await mammoth.convertToHtml({arrayBuffer:ab});
+      return {name, html: result.value, raw: ''};
+    }catch(e){
+      return {name, html:`<p>Error convirtiendo DOCX: ${escapeHtml(e.message)}</p>`, raw: ''};
+    }
+  }
+  // pdf
+  if(file.type === 'application/pdf' || suf === 'pdf'){
+    try{
+      const ab = await file.arrayBuffer();
+      const pdf = await pdfjsLib.getDocument({data:ab}).promise;
+      let out = '';
+      for(let i=1;i<=pdf.numPages;i++){
+        const page = await pdf.getPage(i);
+        const content = await page.getTextContent();
+        const text = content.items.map(it=>it.str).join(' ');
+        out += `<p>${escapeHtml(text)}</p>`;
+      }
+      return {name, html: out, raw: ''};
+    }catch(e){
+      return {name, html:`<p>Error extrayendo PDF: ${escapeHtml(e.message)}</p>`, raw: ''};
+    }
+  }
+  // image
+  if(file.type.startsWith('image/')){
+    const dataUrl = optResize.checked ? await resizeImage(file) : await new Promise(res=>{ const r = new FileReader(); r.onload = ()=> res(r.result); r.readAsDataURL(file); });
+    return {name, html: `<div><img src="${dataUrl}" alt="${escapeHtml(name)}"></div>`, raw: ''};
+  }
+  // fallback
+  try{
+    const txt = await file.text();
+    return {name, html: convertTextOrMarkdown(txt), raw: txt};
+  }catch(e){
+    return {name, html:`<p>No soportado: ${escapeHtml(name)}</p>`, raw: ''};
+  }
+}
+
+/* Convertir markdown/plain -> HTML (marked) */
+function convertTextOrMarkdown(txt){
+  const looksLikeMd = /(^#|\n#|\*\*|\* |`|^- )/m.test(txt);
+  if(looksLikeMd){ try{ return marked.parse(txt); }catch(e){ return `<pre>${escapeHtml(txt)}</pre>`; } }
+  return txt.split(/\n\n+/).map(p => `<p>${escapeHtml(p).replace(/\n/g,' ')}</p>`).join("\n");
+}
+
+/* -------------- Secciones: agregar / renderizar / editar / reordenar -------------- */
+function addSection({name, html, rawText}){
+  const id = uid();
+  sections.push({id, name: name || 'Sección', html: html || '<p></p>', rawText: rawText || ''});
+  renderSectionList();
+}
+
+function renderSectionList(){
+  sectionList.innerHTML = '';
+  sections.forEach((s, idx) => {
+    const div = document.createElement('div'); div.className='section-item';
+    const left = document.createElement('div'); left.style.flex = '1';
+    left.innerHTML = `<strong>${escapeHtml(s.name)}</strong><div class="small" style="margin-top:4px">Tamaño: ${Math.round(s.html.length/1)} bytes</div>`;
+    div.appendChild(left);
+    const actions = document.createElement('div'); actions.className='sec-actions';
+    const up = document.createElement('button'); up.textContent='↑'; up.title='Subir'; up.onclick = ()=> moveSection(idx, idx-1);
+    const down = document.createElement('button'); down.textContent='↓'; down.title='Bajar'; down.onclick = ()=> moveSection(idx, idx+1);
+    const edit = document.createElement('button'); edit.textContent='Editar'; edit.onclick = ()=> openEditor(s.id);
+    const del = document.createElement('button'); del.textContent='Borrar'; del.className='secondary'; del.onclick = ()=> { if(confirm('Borrar sección?')) { sections.splice(idx,1); renderSectionList(); } };
+    actions.appendChild(up); actions.appendChild(down); actions.appendChild(edit); actions.appendChild(del);
+    div.appendChild(actions);
+    sectionList.appendChild(div);
+  });
+}
+
+/* mover indices */
+function moveSection(from, to){
+  if(to<0 || to>=sections.length) return;
+  const item = sections.splice(from,1)[0];
+  sections.splice(to,0,item);
+  renderSectionList();
+}
+
+/* abrir editor modal */
+function openEditor(id){
+  const sec = sections.find(x=>x.id===id); if(!sec) return;
+  editingId = id;
+  modalTitle.textContent = sec.name;
+  modalArea.value = sec.rawText || stripHtml(sec.html);
+  modal.style.display = 'flex';
+}
+
+/* guardar edicion */
+modalSave.addEventListener('click', ()=>{
+  const sec = sections.find(x=>x.id===editingId); if(!sec) return;
+  const newRaw = modalArea.value;
+  const newHtml = convertTextOrMarkdown(newRaw);
+  sec.rawText = newRaw;
+  sec.html = newHtml;
+  modal.style.display = 'none';
+  editingId = null;
+  renderSectionList();
+});
+
+modalCancel.addEventListener('click', ()=>{ modal.style.display='none'; editingId=null; });
+
+/* helper: strip minimal HTML -> text */
+function stripHtml(html){
+  const tmp = document.createElement('div'); tmp.innerHTML = html; return tmp.textContent || tmp.innerText || '';
+}
+
+/* -------------- Generar vista previa + TOC -------------- */
+function generateTOC(composedHtml){
+  // buscar h1,h2,h3 en el HTML
+  const tmp = document.createElement('div'); tmp.innerHTML = composedHtml;
+  const headers = tmp.querySelectorAll('h1,h2,h3');
+  if(!headers.length) return '';
+  let toc = '<div class="toc"><strong>Índice</strong><ol>';
+  headers.forEach((h, i)=>{
+    const id = 'toc-'+i;
+    h.id = id;
+    const text = h.textContent || h.innerText || 'Título';
+    const level = h.tagName.toLowerCase() === 'h1' ? 1 : (h.tagName.toLowerCase()==='h2' ? 2 : 3);
+    toc += `<li style="margin-left:${(level-1)*12}px"><a href="#${id}">${escapeHtml(text)}</a></li>`;
+  });
+  toc += '</ol></div>';
+  return {tocHtml: toc, bodyHtml: tmp.innerHTML};
+}
+
+function buildBookHtml(){
+  // compose sections in order
+  const body = sections.map(s => `<section><h2>${escapeHtml(s.name)}</h2>${s.html}</section>`).join('<hr/>');
+  const wrapper = `<div class="book"><h1 class="book-title">Libro generado</h1><div class="meta">Generado: ${new Date().toLocaleString()}</div>${body}</div>`;
+  const tocResult = generateTOC(wrapper);
+  const full = (tocResult.tocHtml || '') + tocResult.bodyHtml;
+  return full;
+}
+
+btnBuild.addEventListener('click', async ()=>{
+  // primero procesar files si hay
+  await processQueuedFiles();
+  if(!sections.length){ alert('No hay secciones. Agregá archivos o pega texto.'); return; }
+  setStatus('Generando vista previa...');
+  const content = buildBookHtml();
+  // show in preview
+  previewInner.innerHTML = content;
+  setStatus('Vista previa lista. Reordená/edita secciones si querés, luego descargá.');
+});
+
+/* -------------- Descargar HTML todo incluido -------------- */
+btnDownload.addEventListener('click', ()=>{
+  if(!sections.length){ alert('No hay contenido para descargar.'); return; }
+  // build full standalone HTML (inline CSS + body)
+  const bookInner = buildBookHtml();
+  const cssInline = `body{font-family:Georgia,serif;color:#072431;padding:18px;background:#f8fbfc} .book{max-width:900px;margin:0 auto;background:#fff;padding:22px;border-radius:8px;box-shadow:0 8px 30px rgba(2,6,8,0.06)} h1{color:#0b6b8a} h2{color:#0b4a6f} p{line-height:1.5} img{max-width:100%;border-radius:6px;margin:12px 0}`;
+  const final = `<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Libro generado</title><style>${cssInline}</style></head><body>${bookInner}</body></html>`;
+  const blob = new Blob([final], {type:'text/html;charset=utf-8'});
+  const a = document.createElement('a');
+  a.href = URL.createObjectURL(blob);
+  a.download = 'libro_resumen.html';
+  a.click();
+  URL.revokeObjectURL(a.href);
+  setStatus('Descarga iniciada: libro_resumen.html');
+});
+
+/* -------------- Misc helpers -------------- */
+// support drag & drop
+['dragenter','dragover'].forEach(ev => window.addEventListener(ev, e => { e.preventDefault(); e.stopPropagation(); }));
+window.addEventListener('drop', e => {
+  e.preventDefault(); e.stopPropagation();
+  if(e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files.length){
+    queuedFiles = Array.from(e.dataTransfer.files);
+    setStatus(queuedFiles.length + ' archivo(s) agregados (arrastrados). Pulsa "Generar vista previa".');
+  }
+});
+
+// expose quick function
+window.convertNotebookStringToBook = s => { pasteBox.value = s; btnPaste.click(); };
+
+</script>
+</body>
+</html>
