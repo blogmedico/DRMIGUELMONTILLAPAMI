@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Calculadora Comparador con Histéresis</title>
+<style>
+    body { font-family: Arial, sans-serif; background: #f4f6f8; padding: 20px; }
+    .container { max-width: 700px; margin: auto; background: white; padding: 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    h2 { text-align: center; }
+    label { display: block; margin-top: 10px; font-weight: bold; }
+    input { width: 100%; padding: 8px; margin-top: 5px; }
+    button { margin-top: 20px; width: 100%; padding: 10px; background: #007bff; color: white; border: none; border-radius: 5px; font-size: 16px; cursor: pointer; }
+    .result { margin-top: 20px; background: #eef2f5; padding: 15px; border-radius: 5px; }
+    .formula { background:#f0f0f0; padding:10px; border-radius:5px; margin-top:10px; font-family: monospace; }
+    svg { margin-top:20px; background:white; border:1px solid #ccc; }
+</style>
+</head>
+<body>
+
+<div class="container">
+    <h2>Calculadora Comparador con Histéresis</h2>
+
+    <div class="formula">
+        Rh/Rx = Vlow / (Vhigh - Vlow)<br>
+        Ry/Rx = Vlow / (Vcc - Vhigh)
+    </div>
+
+    <label>Vcc (Volt)</label>
+    <input type="number" id="vcc" value="12">
+
+    <label>Vhigh (Volt)</label>
+    <input type="number" id="vhigh" value="6.7">
+
+    <label>Vlow (Volt)</label>
+    <input type="number" id="vlow" value="3">
+
+    <label>Rx (ohm)</label>
+    <input type="number" id="rx" value="10000">
+
+    <button onclick="calcular()">Calcular y generar esquema</button>
+
+    <div class="result" id="resultado"></div>
+
+    <svg id="circuito" width="650" height="300"></svg>
+</div>
+
+<script>
+function calcular() {
+    let vcc = parseFloat(document.getElementById("vcc").value);
+    let vhigh = parseFloat(document.getElementById("vhigh").value);
+    let vlow = parseFloat(document.getElementById("vlow").value);
+    let rx = parseFloat(document.getElementById("rx").value);
+
+    if(vhigh <= vlow){
+        document.getElementById("resultado").innerHTML = "Error: Vhigh debe ser mayor que Vlow";
+        return;
+    }
+
+    let rh = rx * (vlow / (vhigh - vlow));
+    let ry = rx * (vlow / (vcc - vhigh));
+
+    document.getElementById("resultado").innerHTML = `
+        <b>Resultados</b><br><br>
+        Rh (realimentación): ${rh.toFixed(0)} ohm<br>
+        Rx: ${rx} ohm<br>
+        Ry: ${ry.toFixed(0)} ohm
+    `;
+
+    dibujarCircuito(rh, rx, ry, vcc);
+}
+
+function dibujarCircuito(rh, rx, ry, vcc) {
+    let svg = document.getElementById("circuito");
+    svg.innerHTML = "";
+
+    function line(x1,y1,x2,y2){
+        svg.innerHTML += `<line x1='${x1}' y1='${y1}' x2='${x2}' y2='${y2}' stroke='black'/>`;
+    }
+
+    function text(x,y,t){
+        svg.innerHTML += `<text x='${x}' y='${y}' font-size='12'>${t}</text>`;
+    }
+
+    function rect(x,y,w,h){
+        svg.innerHTML += `<rect x='${x}' y='${y}' width='${w}' height='${h}' fill='none' stroke='black'/>`;
+    }
+
+    function triangle(){
+        svg.innerHTML += `<polygon points='350,100 350,200 420,150' fill='none' stroke='black'/>`;
+    }
+
+    // Vcc line
+    line(50,50,50,250);
+    text(30,40,`Vcc ${vcc}V`);
+
+    // Rx
+    rect(100,70,20,40);
+    text(90,65,`Rx ${rx}`);
+    line(50,70,100,70);
+    line(50,110,100,110);
+
+    // Ry
+    rect(100,150,20,40);
+    text(90,145,`Ry ${ry.toFixed(0)}`);
+    line(50,150,100,150);
+    line(50,190,100,190);
+    line(50,190,50,250);
+    text(40,270,"GND");
+
+    // connection to opamp
+    line(120,90,350,120);
+    line(120,170,350,170);
+
+    // opamp
+    triangle();
+    text(355,145,"LM358/LM393");
+
+    // output
+    line(420,150,550,150);
+    text(560,150,"OUT");
+
+    // Rh feedback
+    rect(450,80,40,20);
+    text(450,75,`Rh ${rh.toFixed(0)}`);
+    line(550,150,500,150);
+    line(500,150,500,100);
+    line(500,100,450,100);
+    line(450,100,350,120);
+}
+</script>
+
+</body>
+</html>
