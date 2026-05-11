@@ -1,0 +1,142 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sorteo del Cuadro</title>
+
+<style>
+    body{
+        font-family: Arial, sans-serif;
+        background:#111;
+        color:white;
+        text-align:center;
+        margin:0;
+        padding:20px;
+    }
+
+    h1{
+        color:#ff7b00;
+    }
+
+    p{
+        max-width:700px;
+        margin:auto;
+        margin-bottom:20px;
+    }
+
+    .grid{
+        display:grid;
+        grid-template-columns:repeat(10,1fr);
+        gap:8px;
+        max-width:700px;
+        margin:auto;
+    }
+
+    .numero{
+        padding:15px 0;
+        background:#222;
+        border:2px solid #555;
+        border-radius:10px;
+        cursor:pointer;
+        transition:0.3s;
+        font-weight:bold;
+    }
+
+    .numero:hover{
+        background:#ff7b00;
+        color:black;
+    }
+
+    .ocupado{
+        background:#666 !important;
+        color:#222 !important;
+        text-decoration:line-through;
+        cursor:not-allowed;
+    }
+
+    .info{
+        margin-top:25px;
+        font-size:18px;
+    }
+
+    button{
+        margin-top:20px;
+        padding:10px 20px;
+        border:none;
+        border-radius:10px;
+        background:#ff7b00;
+        color:black;
+        font-weight:bold;
+        cursor:pointer;
+    }
+</style>
+</head>
+
+<body>
+
+<h1>🎨 SORTEO DEL CUADRO 🎨</h1>
+
+<p>
+Una mirada intensa, llena de fuerza y misterio 🖤🔥<br>
+Elegí tu número por solo <b>$1000</b>.
+</p>
+
+<div class="grid" id="grid"></div>
+
+<div class="info">
+    Los números tachados ya fueron elegidos.
+</div>
+
+<button onclick="reiniciar()">Reiniciar Sorteo</button>
+
+<script>
+const grid = document.getElementById("grid");
+
+// Cargar números guardados
+let ocupados = JSON.parse(localStorage.getItem("ocupados")) || [];
+
+for(let i=0; i<=99; i++){
+
+    let numero = document.createElement("div");
+
+    let texto = i.toString().padStart(2,"0");
+
+    numero.innerText = texto;
+    numero.classList.add("numero");
+
+    if(ocupados.includes(texto)){
+        numero.classList.add("ocupado");
+    }
+
+    numero.addEventListener("click", ()=>{
+
+        if(numero.classList.contains("ocupado")) return;
+
+        let nombre = prompt("¿Quién reserva el número " + texto + "?");
+
+        if(nombre){
+
+            numero.innerHTML = texto + "<br><small>" + nombre + "</small>";
+            numero.classList.add("ocupado");
+
+            ocupados.push(texto);
+
+            localStorage.setItem("ocupados", JSON.stringify(ocupados));
+        }
+    });
+
+    grid.appendChild(numero);
+}
+
+function reiniciar(){
+
+    if(confirm("¿Seguro querés reiniciar todo el sorteo?")){
+        localStorage.removeItem("ocupados");
+        location.reload();
+    }
+}
+</script>
+
+</body>
+</html>
