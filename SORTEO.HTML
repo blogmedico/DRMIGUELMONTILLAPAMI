@@ -1,76 +1,59 @@
 <!DOCTYPE html>
 <html lang="es">
+
 <head>
+
 <meta charset="UTF-8">
+
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sorteo del Cuadro</title>
+
+<title>Sorteo</title>
 
 <style>
-    body{
-        font-family: Arial, sans-serif;
-        background:#111;
-        color:white;
-        text-align:center;
-        margin:0;
-        padding:20px;
-    }
 
-    h1{
-        color:#ff7b00;
-    }
+body{
+    font-family:Arial;
+    background:#111;
+    color:white;
+    text-align:center;
+    padding:20px;
+}
 
-    p{
-        max-width:700px;
-        margin:auto;
-        margin-bottom:20px;
-    }
+h1{
+    color:#ff7b00;
+}
 
-    .grid{
-        display:grid;
-        grid-template-columns:repeat(10,1fr);
-        gap:8px;
-        max-width:700px;
-        margin:auto;
-    }
+.grid{
+    display:grid;
+    grid-template-columns:repeat(10,1fr);
+    gap:8px;
+    max-width:700px;
+    margin:auto;
+    margin-top:30px;
+}
 
-    .numero{
-        padding:15px 0;
-        background:#222;
-        border:2px solid #555;
-        border-radius:10px;
-        cursor:pointer;
-        transition:0.3s;
-        font-weight:bold;
-    }
+.numero{
+    background:#222;
+    padding:15px;
+    border-radius:10px;
+    cursor:pointer;
+    border:2px solid #555;
+}
 
-    .numero:hover{
-        background:#ff7b00;
-        color:black;
-    }
+.numero:hover{
+    background:#ff7b00;
+    color:black;
+}
 
-    .ocupado{
-        background:#666 !important;
-        color:#222 !important;
-        text-decoration:line-through;
-        cursor:not-allowed;
-    }
+.ocupado{
+    background:#666;
+    color:#222;
+    text-decoration:line-through;
+    cursor:not-allowed;
+}
 
-    .info{
-        margin-top:25px;
-        font-size:18px;
-    }
-
-    button{
-        margin-top:20px;
-        padding:10px 20px;
-        border:none;
-        border-radius:10px;
-        background:#ff7b00;
-        color:black;
-        font-weight:bold;
-        cursor:pointer;
-    }
 </style>
+
 </head>
 
 <body>
@@ -78,49 +61,42 @@
 <h1>🎨 SORTEO DEL CUADRO 🎨</h1>
 
 <p>
-Una mirada intensa, llena de fuerza y misterio 🖤🔥<br>
-Elegí tu número por solo <b>$1000</b>.
+Elegí tu número por solo $1000
 </p>
 
 <div class="grid" id="grid"></div>
 
-<div class="info">
-    Los números tachados ya fueron elegidos.
-</div>
 <script type="module">
 
-// IMPORTAR FIREBASE
 import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
 
 import {
     getFirestore,
-    doc,
-    setDoc,
-    getDoc,
     collection,
-    getDocs
+    getDocs,
+    setDoc,
+    doc
 }
 from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
-// PEGÁ ACÁ TU CONFIG DE FIREBASE
+// PEGA ACA TU CONFIG REAL
 const firebaseConfig = {
 
-    apiKey: "TU_API_KEY",
+    apiKey: "ACA",
 
-    authDomain: "TU_PROYECTO.firebaseapp.com",
+    authDomain: "ACA",
 
-    projectId: "TU_PROYECTO",
+    projectId: "ACA",
 
-    storageBucket: "TU_PROYECTO.appspot.com",
+    storageBucket: "ACA",
 
-    messagingSenderId: "XXXXXXXX",
+    messagingSenderId: "ACA",
 
-    appId: "XXXXXXXX"
+    appId: "ACA"
 };
 
 
-// INICIAR FIREBASE
 const app = initializeApp(firebaseConfig);
 
 const db = getFirestore(app);
@@ -128,63 +104,61 @@ const db = getFirestore(app);
 const grid = document.getElementById("grid");
 
 
-// CARGAR NUMEROS
-async function cargarNumeros(){
+async function cargar(){
 
-    const querySnapshot = await getDocs(collection(db, "sorteo"));
+    const snapshot = await getDocs(collection(db,"sorteo"));
 
     let ocupados = {};
 
-    querySnapshot.forEach((docu)=>{
+    snapshot.forEach((d)=>{
 
-        ocupados[docu.id] = docu.data().nombre;
+        ocupados[d.id] = d.data().nombre;
     });
 
-    for(let i=0; i<=99; i++){
 
-        let numero = document.createElement("div");
+    for(let i=0;i<=99;i++){
 
         let texto = i.toString().padStart(2,"0");
 
-        numero.classList.add("numero");
+        let div = document.createElement("div");
+
+        div.classList.add("numero");
 
         if(ocupados[texto]){
 
-            numero.classList.add("ocupado");
+            div.classList.add("ocupado");
 
-            numero.innerHTML = texto + "<br><small>" + ocupados[texto] + "</small>";
+            div.innerHTML = texto + "<br><small>" + ocupados[texto] + "</small>";
 
         }else{
 
-            numero.innerText = texto;
+            div.innerHTML = texto;
 
-            numero.addEventListener("click", async ()=>{
+            div.onclick = async ()=>{
 
-                let nombre = prompt("¿Quién reserva el número " + texto + "?");
+                let nombre = prompt("Nombre:");
 
-                if(nombre){
+                if(!nombre) return;
 
-                    await setDoc(doc(db, "sorteo", texto), {
+                await setDoc(doc(db,"sorteo",texto),{
 
-                        nombre:nombre
-                    });
+                    nombre:nombre
+                });
 
-                    numero.classList.add("ocupado");
+                div.classList.add("ocupado");
 
-                    numero.innerHTML = texto + "<br><small>" + nombre + "</small>";
-                }
-            });
+                div.innerHTML = texto + "<br><small>" + nombre + "</small>";
+            };
         }
 
-        grid.appendChild(numero);
+        grid.appendChild(div);
     }
 }
 
-cargarNumeros();
+cargar();
 
 </script>
 
-
-
 </body>
+
 </html>
