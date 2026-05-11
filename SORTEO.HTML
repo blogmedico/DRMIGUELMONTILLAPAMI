@@ -87,48 +87,104 @@ Elegí tu número por solo <b>$1000</b>.
 <div class="info">
     Los números tachados ya fueron elegidos.
 </div>
+<script type="module">
+
+// IMPORTAR FIREBASE
+import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.2/firebase-app.js";
+
+import {
+    getFirestore,
+    doc,
+    setDoc,
+    getDoc,
+    collection,
+    getDocs
+}
+from "https://www.gstatic.com/firebasejs/10.12.2/firebase-firestore.js";
 
 
-<script>
+// PEGÁ ACÁ TU CONFIG DE FIREBASE
+const firebaseConfig = {
+
+    apiKey: "TU_API_KEY",
+
+    authDomain: "TU_PROYECTO.firebaseapp.com",
+
+    projectId: "TU_PROYECTO",
+
+    storageBucket: "TU_PROYECTO.appspot.com",
+
+    messagingSenderId: "XXXXXXXX",
+
+    appId: "XXXXXXXX"
+};
+
+
+// INICIAR FIREBASE
+const app = initializeApp(firebaseConfig);
+
+const db = getFirestore(app);
+
 const grid = document.getElementById("grid");
 
-// Cargar números guardados
-let ocupados = JSON.parse(localStorage.getItem("ocupados")) || [];
 
-for(let i=0; i<=99; i++){
+// CARGAR NUMEROS
+async function cargarNumeros(){
 
-    let numero = document.createElement("div");
+    const querySnapshot = await getDocs(collection(db, "sorteo"));
 
-    let texto = i.toString().padStart(2,"0");
+    let ocupados = {};
 
-    numero.innerText = texto;
-    numero.classList.add("numero");
+    querySnapshot.forEach((docu)=>{
 
-    if(ocupados.includes(texto)){
-        numero.classList.add("ocupado");
-    }
-
-    numero.addEventListener("click", ()=>{
-
-        if(numero.classList.contains("ocupado")) return;
-
-        let nombre = prompt("¿Quién reserva el número " + texto + "?");
-
-        if(nombre){
-
-            numero.innerHTML = texto + "<br><small>" + nombre + "</small>";
-            numero.classList.add("ocupado");
-
-            ocupados.push(texto);
-
-            localStorage.setItem("ocupados", JSON.stringify(ocupados));
-        }
+        ocupados[docu.id] = docu.data().nombre;
     });
 
-    grid.appendChild(numero);
+    for(let i=0; i<=99; i++){
+
+        let numero = document.createElement("div");
+
+        let texto = i.toString().padStart(2,"0");
+
+        numero.classList.add("numero");
+
+        if(ocupados[texto]){
+
+            numero.classList.add("ocupado");
+
+            numero.innerHTML = texto + "<br><small>" + ocupados[texto] + "</small>";
+
+        }else{
+
+            numero.innerText = texto;
+
+            numero.addEventListener("click", async ()=>{
+
+                let nombre = prompt("¿Quién reserva el número " + texto + "?");
+
+                if(nombre){
+
+                    await setDoc(doc(db, "sorteo", texto), {
+
+                        nombre:nombre
+                    });
+
+                    numero.classList.add("ocupado");
+
+                    numero.innerHTML = texto + "<br><small>" + nombre + "</small>";
+                }
+            });
+        }
+
+        grid.appendChild(numero);
+    }
 }
 
+cargarNumeros();
+
 </script>
+
+
 
 </body>
 </html>
