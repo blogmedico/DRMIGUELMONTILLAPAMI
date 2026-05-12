@@ -1,0 +1,328 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Sorteo del Cuadro</title>
+
+<style>
+
+body{
+    margin:0;
+    padding:20px;
+    background:#111;
+    font-family:Arial,sans-serif;
+    color:white;
+    text-align:center;
+}
+
+#contenedor{
+    max-width:1000px;
+    margin:auto;
+    background:#1b1b1b;
+    padding:25px;
+    border-radius:20px;
+}
+
+h1{
+    color:#ff7b00;
+}
+
+.grid{
+    display:grid;
+    grid-template-columns:repeat(10,1fr);
+    gap:10px;
+    margin-top:25px;
+}
+
+.numero{
+    background:#222;
+    border:2px solid #444;
+    border-radius:12px;
+    padding:18px;
+    cursor:pointer;
+    font-weight:bold;
+    transition:0.2s;
+}
+
+.numero:hover{
+    background:#ff7b00;
+    color:black;
+    transform:scale(1.05);
+}
+
+table{
+    width:100%;
+    margin-top:30px;
+    border-collapse:collapse;
+}
+
+th,td{
+    border:1px solid #333;
+    padding:10px;
+}
+
+th{
+    background:#ff7b00;
+    color:black;
+}
+
+#contador{
+    margin-top:20px;
+    font-size:20px;
+    color:#ffcc80;
+}
+
+#mensaje{
+    margin-top:25px;
+    background:#222;
+    padding:15px;
+    border-radius:12px;
+    line-height:1.6;
+    color:#ffcc80;
+}
+
+.admin{
+    margin-top:40px;
+}
+
+.admin input{
+    padding:10px;
+    border:none;
+    border-radius:10px;
+    width:220px;
+}
+
+.admin button{
+    margin-top:15px;
+    padding:12px 20px;
+    border:none;
+    border-radius:10px;
+    background:#ff7b00;
+    color:black;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+.admin button:hover{
+    opacity:0.9;
+}
+
+</style>
+
+</head>
+
+<body>
+
+<div id="contenedor">
+
+<h1>🎨 SORTEO DEL CUADRO 🎨</h1>
+
+<p>
+Elegí tu número por solo <b>$1000</b>
+</p>
+
+<div id="contador"></div>
+
+<div class="grid" id="grid"></div>
+
+<div id="mensaje">
+
+📲 Luego de reservar el número, enviar comprobante de pago para confirmar participación.
+
+</div>
+
+<table>
+
+<thead>
+
+<tr>
+<th>Número</th>
+<th>Nombre</th>
+</tr>
+
+</thead>
+
+<tbody id="lista"></tbody>
+
+</table>
+
+<div class="admin">
+
+<h3>Administrador</h3>
+
+<input
+type="password"
+id="codigo"
+placeholder="Código administrador"
+>
+
+<br>
+
+<button onclick="reiniciarSorteo()">
+Reiniciar Sorteo
+</button>
+
+</div>
+
+</div>
+
+<script>
+
+// ===================================
+// URL DE TU APPS SCRIPT
+// ===================================
+
+const API = "https://script.google.com/macros/s/AKfycbzam9JFuQHSJkh63sNGx_OuihT0oUHVZyYCYFvO6ylTt4yjQDKNZKrYs0ahUYquHG9g8g/exec";
+
+// ===================================
+// CODIGO ADMINISTRADOR
+// ===================================
+
+const CODIGO = "MIGUEL182044";
+
+// ===================================
+
+const grid = document.getElementById("grid");
+
+const lista = document.getElementById("lista");
+
+const contador = document.getElementById("contador");
+
+async function cargarNumeros(){
+
+    grid.innerHTML = "";
+
+    lista.innerHTML = "";
+
+    const response = await fetch(API);
+
+    const sorteo = await response.json();
+
+    contador.innerHTML =
+        "🎟️ Quedan " +
+        (100 - sorteo.length) +
+        " números disponibles";
+
+    for(let i=0;i<=99;i++){
+
+        let texto = i
+            .toString()
+            .padStart(2,"0");
+
+        let ocupado = sorteo.find(
+            n => n.numero == texto
+        );
+
+        // NUMERO OCUPADO
+
+        if(ocupado){
+
+            lista.innerHTML += `
+            <tr>
+                <td>${texto}</td>
+                <td>${ocupado.nombre}</td>
+            </tr>
+            `;
+
+            continue;
+        }
+
+        // NUMERO LIBRE
+
+        let div = document.createElement("div");
+
+        div.classList.add("numero");
+
+        div.innerText = texto;
+
+        div.onclick = async ()=>{
+
+            let nombre = prompt(
+                "Ingrese su nombre:"
+            );
+
+            if(!nombre) return;
+
+            nombre = nombre.trim();
+
+            if(nombre.length < 2){
+
+                alert("Nombre inválido");
+
+                return;
+            }
+
+            let confirmar = confirm(
+                "¿Confirmar reserva del número " +
+                texto +
+                "?"
+            );
+
+            if(!confirmar) return;
+
+            await fetch(API, {
+
+                method:"POST",
+
+                body:JSON.stringify({
+
+                    numero:texto,
+
+                    nombre:nombre
+                })
+            });
+
+            alert(
+                "✅ Número reservado correctamente.\n\n" +
+                "📲 Enviar comprobante de pago para confirmar participación."
+            );
+
+            cargarNumeros();
+        };
+
+        grid.appendChild(div);
+    }
+}
+
+// ===================================
+// REINICIAR SORTEO
+// ===================================
+
+async function reiniciarSorteo(){
+
+    let codigo = document
+        .getElementById("codigo")
+        .value
+        .trim();
+
+    if(codigo !== CODIGO){
+
+        alert("❌ Código incorrecto");
+
+        return;
+    }
+
+    let confirmar = confirm(
+        "¿Seguro desea borrar TODO el sorteo?"
+    );
+
+    if(!confirmar) return;
+
+    await fetch(API + "?reset=true");
+
+    alert("✅ Sorteo reiniciado");
+
+    location.reload();
+}
+
+cargarNumeros();
+
+</script>
+
+</body>
+
+</html>
