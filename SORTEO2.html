@@ -111,6 +111,15 @@ button:hover{
     color:#ffb347;
 }
 
+#mensaje{
+    margin-top:25px;
+    background:#222;
+    padding:15px;
+    border-radius:12px;
+    color:#ffcc80;
+    line-height:1.6;
+}
+
 </style>
 
 </head>
@@ -128,6 +137,12 @@ Elegí tu número por solo <b>$1000</b>
 <div id="contador"></div>
 
 <div class="grid" id="grid"></div>
+
+<div id="mensaje">
+
+📲 Luego de reservar el número, enviar comprobante de pago para confirmar participación.
+
+</div>
 
 <table>
 
@@ -164,13 +179,11 @@ Reiniciar Sorteo
 
 <script>
 
+// =============================
+// CODIGO ADMINISTRADOR
+// =============================
+
 const CODIGO = "182044";
-
-// =============================
-// PEGA ACA TU LINK DE MERCADO PAGO
-// =============================
-
-const linkPago = "https://mpago.la/lilifurlani";
 
 // =============================
 
@@ -246,7 +259,7 @@ function cargarNumeros(){
         div.onclick = ()=>{
 
             let nombre = prompt(
-                "Ingrese su nombre:"
+                "Ingrese su nombre completo y dni:"
             );
 
             if(!nombre) return;
@@ -261,9 +274,9 @@ function cargarNumeros(){
             }
 
             let confirmar = confirm(
-                "Reservar número " +
+                "¿Confirmar reserva del número " +
                 texto +
-                " y continuar al pago?"
+                "?"
             );
 
             if(!confirmar) return;
@@ -279,10 +292,9 @@ function cargarNumeros(){
 
             cargarNumeros();
 
-            // REDIRECCION A MERCADO PAGO
-            window.open(
-                linkPago,
-                "_blank"
+            alert(
+                "✅ Número reservado correctamente.\n\n" +
+                "📲 Envíe comprobante de pago a 2615170499 para confirmar participación."
             );
         };
 
@@ -299,7 +311,7 @@ function reiniciarSorteo(){
 
     if(codigo !== CODIGO){
 
-        alert("Código incorrecto");
+        alert("❌ Código incorrecto");
 
         return;
     }
