@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>HTML a PDF</title>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+
+<style>
+    body{
+        font-family: Arial, sans-serif;
+        background:#f0f0f0;
+        padding:30px;
+    }
+
+    .container{
+        background:white;
+        max-width:900px;
+        margin:auto;
+        padding:25px;
+        border-radius:12px;
+        box-shadow:0 0 10px rgba(0,0,0,0.2);
+    }
+
+    h1{
+        text-align:center;
+    }
+
+    input, button{
+        margin-top:15px;
+    }
+
+    button{
+        padding:12px 20px;
+        border:none;
+        background:#007bff;
+        color:white;
+        border-radius:8px;
+        cursor:pointer;
+        font-size:16px;
+    }
+
+    button:hover{
+        background:#0056b3;
+    }
+
+    #preview{
+        margin-top:30px;
+        border:1px solid #ccc;
+        padding:20px;
+        min-height:300px;
+        background:white;
+    }
+</style>
+</head>
+<body>
+
+<div class="container">
+
+    <h1>Convertidor HTML → PDF</h1>
+
+    <input type="file" id="fileInput" accept=".html,.htm">
+
+    <br>
+
+    <button onclick="convertToPDF()">
+        Descargar PDF
+    </button>
+
+    <div id="preview">
+        <h2>Vista previa</h2>
+    </div>
+
+</div>
+
+<script>
+
+let htmlContent = "";
+
+document.getElementById('fileInput').addEventListener('change', function(event){
+
+    const file = event.target.files[0];
+
+    if(!file) return;
+
+    const reader = new FileReader();
+
+    reader.onload = function(e){
+
+        htmlContent = e.target.result;
+
+        document.getElementById('preview').innerHTML = htmlContent;
+    };
+
+    reader.readAsText(file);
+
+});
+
+function convertToPDF(){
+
+    const element = document.getElementById('preview');
+
+    const options = {
+        margin: 10,
+        filename: 'archivo.pdf',
+        image: { type: 'jpeg', quality: 1 },
+        html2canvas: { scale: 2 },
+        jsPDF: {
+            unit: 'mm',
+            format: 'a4',
+            orientation: 'portrait'
+        }
+    };
+
+    html2pdf().set(options).from(element).save();
+}
+
+</script>
+
+</body>
+</html>
