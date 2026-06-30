@@ -1,0 +1,217 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dr. Montilla Miguel - Información de Atención</title>
+    <style>
+        :root {
+            --primary-color: #007791;
+            --secondary-color: #00a896;
+            --dark-color: #2b2d42;
+            --light-bg: #f8f9fa;
+            --accent-color: #e63946;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--dark-color);
+            background-color: #f0f2f5;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 40px auto;
+            background: #ffffff;
+            padding: 40px;
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+        }
+
+        header {
+            text-align: center;
+            border-bottom: 3px solid var(--primary-color);
+            padding-bottom: 20px;
+            margin-bottom: 30px;
+        }
+
+        h1 {
+            color: var(--primary-color);
+            margin: 0 0 10px 0;
+            font-size: 2.5em;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .subtitle {
+            color: #6c757d;
+            font-size: 1.1em;
+            margin: 0;
+            font-style: italic;
+        }
+
+        h2 {
+            color: var(--secondary-color);
+            border-left: 5px solid var(--secondary-color);
+            padding-left: 15px;
+            margin-top: 30px;
+            font-size: 1.4em;
+        }
+
+        .grid-info {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 30px;
+        }
+
+        @media (max-width: 600px) {
+            .grid-info {
+                grid-template-columns: 1fr;
+            }
+            .container {
+                margin: 10px;
+                padding: 20px;
+            }
+        }
+
+        .card {
+            background: var(--light-bg);
+            padding: 20px;
+            border-radius: 8px;
+            border: 1px solid #e9ecef;
+        }
+
+        .highlight-card {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 25px;
+            border-radius: 8px;
+            text-align: center;
+            grid-column: 1 / -1;
+        }
+
+        .highlight-card h3 {
+            margin: 0 0 10px 0;
+            font-size: 1.5em;
+        }
+
+        .phone-btn {
+            display: inline-block;
+            background-color: var(--accent-color);
+            color: white;
+            padding: 12px 25px;
+            text-decoration: none;
+            border-radius: 50px;
+            font-weight: bold;
+            margin-top: 15px;
+            transition: transform 0.2s, background-color 0.2s;
+            box-shadow: 0 4px 10px rgba(230, 57, 70, 0.3);
+        }
+
+        .phone-btn:hover {
+            transform: translateY(-2px);
+            background-color: #c92a3a;
+        }
+
+        ul {
+            padding-left: 20px;
+            margin: 0;
+        }
+
+        li {
+            margin-bottom: 10px;
+        }
+
+        .payment-methods {
+            list-style-type: none;
+            padding: 0;
+        }
+
+        .payment-methods li {
+            position: relative;
+            padding-left: 30px;
+            margin-bottom: 12px;
+        }
+
+        .payment-methods li::before {
+            content: "✓";
+            position: absolute;
+            left: 0;
+            color: var(--secondary-color);
+            font-weight: bold;
+            font-size: 1.2em;
+        }
+
+        footer {
+            text-align: center;
+            margin-top: 40px;
+            padding-top: 20px;
+            border-top: 1px solid #e9ecef;
+            color: #868e96;
+            font-size: 0.9em;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Dr. Montilla Miguel</h1>
+        <p class="subtitle">Información Médica y Divulgación Científica</p>
+    </header>
+
+    <main>
+        <div class="grid-info">
+            <!-- Bloque de Turnos -->
+            <div class="highlight-card">
+                <h3>Solicitud de Turnos Particulares</h3>
+                <p>Lunes a Jueves de 9:00 hs a 12:30 hs</p>
+                <a href="tel:2617120463" class="phone-btn">📞 Llamar al 2617120463</a>
+            </div>
+
+            <!-- Horarios de Atención -->
+            <div class="card">
+                <h2>Horarios de Atención</h2>
+                <p><strong>Pacientes Particulares:</strong></p>
+                <ul>
+                    <li>Lunes: 16:30 hs a 20:30 hs</li>
+                    <li>Miércoles: 16:30 hs a 20:30 hs</li>
+                    <li>Viernes: 16:30 hs a 20:30 hs</li>
+                </ul>
+            </div>
+
+            <!-- Servicios -->
+            <div class="card">
+                <h2>Servicios Médicos</h2>
+                <ul>
+                    <li>Atención Médica de Cabecera</li>
+                    <li>Consultas Particulares en Consultorio</li>
+                    <li>Servicio de Consultas Domiciliarias Programadas <br><small style="color:#6c757d;">(Según ubicación geográfica)</small></li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- Formas de Pago -->
+        <h2>Formas de Pago (Mercado Pago)</h2>
+        <div class="card">
+            <ul class="payment-methods">
+                <li>Efectivo</li>
+                <li>Transferencia bancaria directa (Alias o CBU)</li>
+                <li>Link de pago directo enviado a su teléfono celular</li>
+                <li>Pago presencial en Rapipago o Pago Fácil utilizando el link enviado</li>
+                <li>Abono remoto mediante un tercero (familiar o amigo) a través del link provisto</li>
+            </ul>
+        </div>
+    </main>
+
+    <footer>
+        <p>&copy; 2026 Dr. Montilla Miguel. Todos los derechos reservados.</p>
+    </footer>
+</div>
+
+</body>
+</html>
