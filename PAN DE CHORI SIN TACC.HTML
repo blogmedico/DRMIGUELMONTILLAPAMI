@@ -1,0 +1,252 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Pan Sin Gluten</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+
+<style>
+
+*{
+    margin:0;
+    padding:0;
+    box-sizing:border-box;
+}
+
+body{
+    font-family:'Poppins',sans-serif;
+    background:linear-gradient(135deg,#fff8f0,#f5efe7);
+    color:#333;
+    padding:40px;
+}
+
+.container{
+    max-width:900px;
+    margin:auto;
+}
+
+.card{
+    background:white;
+    border-radius:25px;
+    overflow:hidden;
+    box-shadow:0 20px 50px rgba(0,0,0,.15);
+}
+
+.hero{
+    background:linear-gradient(120deg,#ff9800,#ffb74d);
+    color:white;
+    padding:60px;
+    text-align:center;
+}
+
+.hero h1{
+    font-size:3rem;
+    margin-bottom:15px;
+}
+
+.hero p{
+    font-size:1.2rem;
+    opacity:.95;
+}
+
+.content{
+    padding:50px;
+}
+
+.section{
+    margin-bottom:45px;
+}
+
+.section h2{
+    color:#ff7a00;
+    margin-bottom:20px;
+    border-left:6px solid #ff9800;
+    padding-left:15px;
+}
+
+.ingredients{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(280px,1fr));
+    gap:15px;
+}
+
+.item{
+    background:#fff7ed;
+    padding:15px;
+    border-radius:12px;
+    transition:.3s;
+}
+
+.item:hover{
+    transform:translateY(-5px);
+    background:#ffe6c7;
+}
+
+.steps{
+    counter-reset:step;
+}
+
+.step{
+    position:relative;
+    padding-left:70px;
+    margin-bottom:28px;
+}
+
+.step::before{
+    counter-increment:step;
+    content:counter(step);
+    position:absolute;
+    left:0;
+    top:0;
+    width:45px;
+    height:45px;
+    border-radius:50%;
+    background:#ff9800;
+    color:white;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-weight:bold;
+    font-size:20px;
+}
+
+.tip{
+    background:#fff3cd;
+    border-left:6px solid #ff9800;
+    padding:20px;
+    border-radius:12px;
+    font-size:1.05rem;
+}
+
+footer{
+    text-align:center;
+    margin-top:40px;
+    color:#666;
+    font-size:.95rem;
+}
+
+@media(max-width:700px){
+
+.hero{
+padding:40px 25px;
+}
+
+.hero h1{
+font-size:2.2rem;
+}
+
+.content{
+padding:30px;
+}
+
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="container">
+
+<div class="card">
+
+<div class="hero">
+<h1>🥖 Pan Sin Gluten</h1>
+<p>Ideal para disfrutar unos buenos choripanes mientras alienta a la Selección ⚽🇦🇷</p>
+</div>
+
+<div class="content">
+
+<div class="section">
+
+<h2>🧂 Ingredientes</h2>
+
+<div class="ingredients">
+
+<div class="item">🌾 380 g de premezcla sin gluten</div>
+<div class="item">🥛 40 g de leche en polvo</div>
+<div class="item">🧪 4 g de goma xántica</div>
+<div class="item">🧂 10 g de sal</div>
+<div class="item">🍬 10 g de azúcar</div>
+<div class="item">🧈 30 g de manteca</div>
+<div class="item">🍞 10 g de levadura</div>
+<div class="item">💧 300 ml de agua</div>
+
+</div>
+
+</div>
+
+<div class="section">
+
+<h2>👨‍🍳 Preparación</h2>
+
+<div class="steps">
+
+<div class="step">
+Mezclar todos los ingredientes secos.
+</div>
+
+<div class="step">
+Agregar la manteca y el agua a temperatura ambiente.
+</div>
+
+<div class="step">
+Amasar hasta obtener una mezcla homogénea.
+</div>
+
+<div class="step">
+Dejar reposar durante <strong>30 minutos</strong>.
+</div>
+
+<div class="step">
+Formar los pancitos usando un poco de premezcla para que no se peguen a las manos.
+</div>
+
+<div class="step">
+Dejar leudar otros <strong>30 minutos</strong>.
+</div>
+
+<div class="step">
+Pincelar con agua y realizar un corte en el centro.
+</div>
+
+<div class="step">
+Colocar una fuente con agua en la base del horno para lograr una corteza bien crocante.
+</div>
+
+<div class="step">
+Hornear hasta que los panes estén bien dorados.
+</div>
+
+</div>
+
+</div>
+
+<div class="section">
+
+<div class="tip">
+
+<h2>💡 Consejo</h2>
+
+<p>
+La humedad generada por la fuente con agua ayuda a obtener una corteza más crujiente mientras el interior permanece suave y esponjoso.
+</p>
+
+</div>
+
+</div>
+
+</div>
+
+</div>
+
+<footer>
+Hecho con ❤️ para los amantes del pan sin gluten.
+</footer>
+
+</div>
+
+</body>
+</html>
