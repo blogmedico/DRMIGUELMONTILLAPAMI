@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Dr. Montilla AI - Versión Simplificada</title>
+    <style>
+        :root { --primary: #2c3e50; --accent-blue: #3498db; --accent-purple: #9b59b6; --bg: #f4f7f6; }
+        body { font-family: 'Segoe UI', sans-serif; background-color: var(--bg); color: var(--primary); padding: 20px; }
+        .container { max-width: 900px; margin: 0 auto; background: white; padding: 30px; border-radius: 12px; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        header { text-align: center; border-bottom: 3px solid var(--accent-blue); margin-bottom: 25px; }
+        .modulo { margin-bottom: 20px; padding: 15px; border: 1px solid #eee; border-radius: 8px; }
+        h3 { margin-top: 0; border-bottom: 1px solid #eee; padding-bottom: 10px; font-size: 1.1em; }
+        .grid-paciente { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        .campo { display: flex; flex-direction: column; }
+        label { font-weight: bold; font-size: 0.85em; margin-bottom: 5px; color: #666; }
+        input, textarea { padding: 10px; border: 1px solid #ddd; border-radius: 6px; font-size: 1em; width: 100%; box-sizing: border-box; }
+        .grid-antecedentes { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 10px; }
+        .med-item { background: #f9f9f9; padding: 5px 10px; margin-bottom: 5px; border-left: 4px solid var(--accent-blue); display: flex; justify-content: space-between; }
+        .grid-ia { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .btn-ia { padding: 15px; border: none; border-radius: 8px; color: white; font-weight: bold; cursor: pointer; font-size: 1em; }
+        #resultadoIA { margin-top: 20px; padding: 25px; background: #fff; color: #333; border: 2px solid #ddd; border-radius: 8px; white-space: pre-wrap; display: none; line-height: 1.6; }
+        .btn-descargar { background-color: #27ae60; color: white; border: none; padding: 15px; border-radius: 8px; cursor: pointer; width: 100%; font-weight: bold; margin-top: 15px; display: none; }
+
+        @media print {
+            body * { visibility: hidden; }
+            #resultadoIA, #resultadoIA * { visibility: visible; }
+            #resultadoIA { position: absolute; left: 0; top: 0; width: 100%; border: none; }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <header>
+        <h1>Dr. Montilla AI</h1>
+        <p>Asistente Inteligente para Consultorio Médico</p>
+    </header>
+
+    <!-- 1. Datos Paciente -->
+    <section class="modulo">
+        <h3>👤 1. Paciente</h3>
+        <div class="grid-paciente">
+            <div class="campo"><label>Nombre y Apellido</label><input type="text" id="nombre"></div>
+            <div class="campo"><label>DNI</label><input type="text" id="dni"></div>
+            <div class="campo"><label>Fecha Nac.</label><input type="date" id="fechaNac" onchange="calcularEdad()"></div>
+            <div class="campo"><label>Edad</label><input type="text" id="edad" readonly style="background:#eee;"></div>
+        </div>
+    </section>
+
+    <!-- 2. Antecedentes -->
+    <section class="modulo">
+        <h3>📋 2. Antecedentes</h3>
+        <div class="grid-antecedentes" id="checksAnt">
+            <label><input type="checkbox" value="HTA"> HTA</label>
+            <label><input type="checkbox" value="Diabetes"> Diabetes</label>
+            <label><input type="checkbox" value="FA"> FA</label>
+            <label><input type="checkbox" value="EPOC"> EPOC</label>
+            <label><input type="checkbox" value="IRC"> IRC</label>
+            <label><input type="checkbox" value="Hipotiroidismo"> Hipotiroidismo</label>
+            <label><input type="checkbox" value="Demencia"> Demencia</label>
+            <label><input type="checkbox" value="Parkinson"> Parkinson</label>
+            <label><input type="checkbox" value="ACV"> ACV</label>
+            <label><input type="checkbox" value="IAM"> IAM</label>
+            <label><input type="checkbox" value="Cáncer"> Cáncer</label>
+        </div>
+    </section>
+
+    <!-- 3. Resumen Historia Anterior -->
+    <section class="modulo">
+        <h3>📜 3. Resumen Historia Anterior</h3>
+        <textarea id="hAnterior" rows="3" placeholder="Internaciones previas, cirugías, hitos..."></textarea>
+    </section>
+
+    <!-- 4. Medicación -->
+    <section class="modulo">
+        <h3>💊 4. Medicación Actual</h3>
+        <div style="display:flex; gap:10px; margin-bottom:10px;">
+            <input type="text" id="medInput" placeholder="Ej: Enalapril 10mg/12h" style="flex-grow:1;">
+            <button onclick="agregarMed()" style="background:var(--accent-blue); color:white; border:none; padding:10px 20px; border-radius:6px; cursor:pointer;">+</button>
+        </div>
+        <ul id="medList" style="list-style:none; padding:0;"></ul>
+    </section>
+
+    <!-- 5. Consulta -->
+    <section class="modulo">
+        <h3>🩺 5. Motivo de Consulta y Examen</h3>
+        <textarea id="evolucion" rows="5" placeholder="Relato actual y examen físico..."></textarea>
+    </section>
+
+    <!-- 6. IA -->
+    <section class="modulo" style="border: 2px solid var(--accent-blue);">
+        <h3>🧠 6. Solicitudes Inteligentes</h3>
+        <div class="grid-ia">
+            <button class="btn-ia" style="background:var(--accent-purple);" onclick="generar('SOAP')">📄 Generar SOAP</button>
+            <button class="btn-ia" style="background:var(--accent-blue);" onclick="generar('PROMPT')">🤖 Prompt OpenAI</button>
+        </div>
+        <div id="resultadoIA"></div>
+        <button id="btnPDF" class="btn-descargar" onclick="window.print()">📥 Descargar en PDF</button>
+    </section>
+</div>
+
+<script>
+    function calcularEdad() {
+        const f = document.getElementById('fechaNac').value;
+        if(!f) return;
+        const hoy = new Date();
+        const cumple = new Date(f);
+        let edad = hoy.getFullYear() - cumple.getFullYear();
+        if (hoy.getMonth() < cumple.getMonth() || (hoy.getMonth() === cumple.getMonth() && hoy.getDate() < cumple.getDate())) edad--;
+        document.getElementById('edad').value = edad + " años";
+    }
+
+    function agregarMed() {
+        const i = document.getElementById('medInput');
+        if(!i.value) return;
+        const li = document.createElement('li');
+        li.className = 'med-item';
+        li.innerHTML = `<span>${i.value}</span><button onclick="this.parentElement.remove()" style="color:red; border:none; background:none; cursor:pointer;">✕</button>`;
+        document.getElementById('medList').appendChild(li);
+        i.value = "";
+    }
+
+    function generar(tipo) {
+        const res = document.getElementById('resultadoIA');
+        const pdf = document.getElementById('btnPDF');
+        res.style.display = "block";
+        pdf.style.display = "block";
+
+        const nombre = document.getElementById('nombre').value || "Paciente";
+        const edad = document.getElementById('edad').value || "S/E";
+        const antes = Array.from(document.querySelectorAll('#checksAnt input:checked')).map(c => c.value).join(", ");
+        const hAnterior = document.getElementById('hAnterior').value || "Sin datos previos.";
+        const meds = Array.from(document.querySelectorAll('#medList span')).map(s => s.innerText).join(", ") || "Ninguna";
+        const evolucion = document.getElementById('evolucion').value || "Control de rutina.";
+        const fecha = new Date().toLocaleDateString();
+
+        let informe = `DR. MONTILLA AI | FECHA: ${fecha}\nPACIENTE: ${nombre.toUpperCase()} (${edad})\n\n`;
+
+        if(tipo === 'PROMPT') {
+            res.innerText = `ACTÚA COMO UN MÉDICO EXPERTO EN GERIATRÍA. GENERA UNA EVOLUCIÓN PROFESIONAL BASADA EN:\n\n` +
+                `ANTECEDENTES: ${antes}\nHISTORIA PREVIA: ${hAnterior}\nMEDICACIÓN: ${meds}\nEVOLUCIÓN HOY: ${evolucion}\n\n` +
+                `TAREA: 1. Redacta la historia clínica profesional. 2. Sugiere DIAGNÓSTICOS DIFERENCIALES. 3. Define un PLAN DE ESTUDIOS y ALERTAS PREVENTIVAS.`;
+        } else {
+            res.innerText = informe + `S: ${evolucion}\nO: Examen físico realizado.\nA: Evaluación de paciente con antecedentes de ${antes}.\nP: Continuar controles y medicación actual.`;
+        }
+    }
+</script>
+</body>
+</html>
