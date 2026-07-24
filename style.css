@@ -1,0 +1,478 @@
+/* =====================================
+   EXPLORADOR MEDICO - ESTILO PRINCIPAL
+   ===================================== */
+
+
+*{
+    box-sizing:border-box;
+}
+
+
+body{
+
+    margin:0;
+    padding:0;
+
+    font-family:
+    "Segoe UI",
+    Arial,
+    sans-serif;
+
+    background:#e9eef5;
+
+    color:#263238;
+
+}
+
+
+
+.app{
+
+    width:100vw;
+
+    height:100vh;
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+
+
+/* ==========================
+        CABECERA
+   ========================== */
+
+
+header{
+
+    height:70px;
+
+    background:#0d6efd;
+
+    color:white;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:space-between;
+
+    padding:0 25px;
+
+    box-shadow:0 2px 8px #999;
+
+}
+
+
+header h1{
+
+    margin:0;
+
+    font-size:26px;
+
+    font-weight:600;
+
+}
+
+
+
+.acciones button{
+
+    margin-left:10px;
+
+}
+
+
+
+/* ==========================
+        BOTONES
+   ========================== */
+
+
+button{
+
+    border:none;
+
+    background:white;
+
+    color:#0d6efd;
+
+    padding:10px 15px;
+
+    border-radius:6px;
+
+    font-size:15px;
+
+    font-weight:600;
+
+    cursor:pointer;
+
+    transition:.2s;
+
+}
+
+
+button:hover{
+
+    background:#e7f0ff;
+
+    transform:translateY(-1px);
+
+}
+
+
+
+/* ==========================
+        BUSCADOR
+   ========================== */
+
+
+.buscador{
+
+    height:70px;
+
+    background:white;
+
+    display:flex;
+
+    align-items:center;
+
+    padding:15px 25px;
+
+    gap:20px;
+
+    border-bottom:1px solid #ccc;
+
+}
+
+
+
+#busqueda{
+
+    width:450px;
+
+    padding:12px;
+
+    font-size:17px;
+
+    border-radius:8px;
+
+    border:1px solid #bbb;
+
+    outline:none;
+
+}
+
+
+
+#busqueda:focus{
+
+    border-color:#0d6efd;
+
+    box-shadow:0 0 5px #0d6efd55;
+
+}
+
+
+
+#contador{
+
+    color:#555;
+
+    font-weight:bold;
+
+}
+
+
+
+/* ==========================
+        ZONA PRINCIPAL
+   ========================== */
+
+
+main{
+
+    flex:1;
+
+    display:grid;
+
+    grid-template-columns:
+
+    30% 35% 35%;
+
+    gap:10px;
+
+    padding:10px;
+
+    overflow:hidden;
+
+}
+
+
+
+
+/* ==========================
+        PANELES
+   ========================== */
+
+
+.panel{
+
+    background:white;
+
+    border-radius:10px;
+
+    box-shadow:
+
+    0 2px 8px #0002;
+
+    overflow:hidden;
+
+    display:flex;
+
+    flex-direction:column;
+
+}
+
+
+
+.panel h2{
+
+    margin:0;
+
+    padding:15px;
+
+    background:#f4f7fb;
+
+    border-bottom:1px solid #ddd;
+
+    font-size:18px;
+
+}
+
+
+
+/* ==========================
+        LISTAS
+   ========================== */
+
+
+#listaPacientes,
+#listaArchivos,
+#visorContenido{
+
+    overflow:auto;
+
+    padding:10px;
+
+    flex:1;
+
+}
+
+
+/* TARJETAS */
+
+
+.paciente{
+
+    padding:12px;
+
+    margin-bottom:8px;
+
+    background:#f8f9fa;
+
+    border-radius:8px;
+
+    cursor:pointer;
+
+    border-left:5px solid #0d6efd;
+
+    transition:.2s;
+
+}
+
+
+
+.paciente:hover{
+
+    background:#e7f0ff;
+
+}
+
+
+
+.paciente.activo{
+
+    background:#cfe2ff;
+
+}
+
+
+
+/* ARCHIVOS */
+
+
+.archivo{
+
+    padding:10px;
+
+    margin-bottom:6px;
+
+    background:#fafafa;
+
+    border-radius:6px;
+
+    border:1px solid #ddd;
+
+    cursor:pointer;
+
+}
+
+
+
+.archivo:hover{
+
+    background:#f1f8ff;
+
+}
+
+
+
+/* ==========================
+        INFORMACION
+   ========================== */
+
+
+.dato{
+
+    margin-bottom:12px;
+
+    padding:10px;
+
+    background:#f8f9fa;
+
+    border-radius:8px;
+
+}
+
+
+
+.dato strong{
+
+    color:#0d6efd;
+
+}
+
+
+
+/* ==========================
+        MENSAJES VACIOS
+   ========================== */
+
+
+.vacio{
+
+    color:#777;
+
+    text-align:center;
+
+    margin-top:40px;
+
+    font-size:16px;
+
+}
+
+
+
+/* ==========================
+        PIE
+   ========================== */
+
+
+footer{
+
+    height:35px;
+
+    background:#343a40;
+
+    color:white;
+
+    display:flex;
+
+    align-items:center;
+
+    justify-content:center;
+
+    font-size:13px;
+
+}
+
+
+
+/* ==========================
+        RESPONSIVE
+   ========================== */
+
+
+@media(max-width:900px){
+
+
+main{
+
+    grid-template-columns:1fr;
+
+    overflow:auto;
+
+}
+
+
+.panel{
+
+    min-height:300px;
+
+}
+
+
+
+#busqueda{
+
+    width:100%;
+
+}
+
+
+
+}
+/*==============================
+      VISOR
+==============================*/
+
+#visorContenido{
+
+    background:white;
+
+    height:100%;
+
+}
+
+#visorContenido img{
+
+    max-width:100%;
+
+    display:block;
+
+    margin:auto;
+
+}
+
+#visorContenido iframe{
+
+    width:100%;
+
+    height:100%;
+
+    border:none;
+
+}

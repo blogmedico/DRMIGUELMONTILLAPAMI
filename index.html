@@ -1,0 +1,169 @@
+<!DOCTYPE html>
+<html lang="es">
+
+<head>
+
+<meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Explorador Médico</title>
+
+<link rel="stylesheet" href="style.css">
+
+</head>
+
+
+<body>
+
+<div class="app">
+
+
+<header>
+
+<h1>🩺 Explorador Médico</h1>
+
+<div class="acciones">
+
+<button id="btnCarpeta">
+📂 Seleccionar carpeta pacientes
+</button>
+
+<button id="btnActualizar">
+🔄 Actualizar índice
+</button>
+
+</div>
+
+</header>
+
+
+
+<section class="buscador">
+
+<input 
+id="busqueda"
+placeholder="Buscar DNI, apellido o nombre..."
+autocomplete="off">
+
+<span id="contador">
+0 pacientes
+</span>
+
+</section>
+
+
+
+
+<main>
+
+
+<!-- PANEL PACIENTES -->
+
+<section class="panel pacientes">
+
+<h2>👤 Pacientes</h2>
+
+<div id="listaPacientes">
+
+<p class="vacio">
+Seleccione una carpeta para comenzar
+</p>
+
+</div>
+
+</section>
+
+
+
+
+<!-- PANEL ARCHIVOS -->
+
+<section class="panel archivos">
+
+
+<h2>📂 Archivos</h2>
+
+
+<div id="listaArchivos">
+
+<p class="vacio">
+Seleccione un paciente
+</p>
+
+</div>
+
+
+<div class="botonesPaciente">
+
+<button id="btnAbrirHistoria">
+🌐 Abrir Historia
+</button>
+
+
+<button id="btnAbrirCarpeta">
+📂 Abrir Carpeta
+</button>
+
+</div>
+
+</section>
+
+
+
+
+
+<!-- PANEL INFORMACION -->
+
+<section class="panel info">
+
+<h2>👁 Vista previa</h2>
+
+<div id="visorContenido">
+
+<p class="vacio">
+
+Seleccione un archivo
+
+</p>
+
+</div>
+
+</section>
+<p class="vacio">
+
+Sin paciente seleccionado
+
+</p>
+
+
+</div>
+
+
+</section>
+
+
+</main>
+
+
+
+
+<footer>
+
+<span>
+Explorador Médico - Dr. Montilla
+</span>
+
+</footer>
+
+
+</div>
+
+
+
+<script src="app.js"></script>
+
+
+</body>
+
+</html>
