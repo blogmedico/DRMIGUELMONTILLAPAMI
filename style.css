@@ -200,13 +200,11 @@ main{
 
     grid-template-columns:
 
-    30% 35% 35%;
+    22% 18% 60%;
 
     gap:10px;
 
     padding:10px;
-
-    overflow:hidden;
 
 }
 
