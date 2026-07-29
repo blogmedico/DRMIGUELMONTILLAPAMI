@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>Explorador Médico V3</title>
+
+<link rel="stylesheet" href="style.css">
+</head>
+
+<body>
+<BR>
+<a href="https://raw.githack.com/blogmedico/DRMIGUELMONTILLAPAMI/main/transcriptor%20zip.html" target="_blank">
+  <button>TRANSFORMAR A PDF</button>
+</a>
+<a href="https://raw.githack.com/blogmedico/DRMIGUELMONTILLAPAMI/main/CONVERTIDOR%20A%20HTML%20ultra-pro.html" target="_blank">
+  <button>CONVERTIR NOTBOOKLM A HTML</button>
+</a>
+
+
+  
+<header>
+
+    <h1>🩺 Explorador Médico V3</h1>
+
+    <div class="barra">
+                   
+
+        <button id="btnCarpeta">
+            📂 Seleccionar carpeta de pacientes
+        </button>
+
+        <button id="btnActualizar">
+            🔄 Actualizar
+        </button>
+
+        <input
+            id="txtBuscar"
+            type="text"
+            placeholder="Buscar por DNI o apellido..."
+        >
+
+    </div>
+
+</header>
+
+<main>
+
+    <!-- PACIENTES -->
+
+    <section class="panel">
+
+        <div class="titulo">
+
+            👤 Pacientes
+
+            <span id="contadorPacientes">0</span>
+
+        </div>
+
+        <div id="listaPacientes" class="lista"></div>
+
+    </section>
+
+
+    <!-- ARCHIVOS -->
+
+    <section class="panel">
+
+        <div class="titulo">
+
+            📂 Archivos
+
+        </div>
+
+        <div id="listaArchivos" class="lista"></div>
+
+    </section>
+
+
+    <!-- INFORMACIÓN -->
+
+    <section class="panel">
+
+        <div class="titulo">
+
+            ℹ Información
+
+        </div>
+
+        <div id="infoPaciente">
+
+            <p>Seleccione un paciente.</p>
+
+        </div>
+
+    </section>
+
+</main>
+
+<footer>
+
+Explorador Médico V3 - Dr. Montilla
+
+</footer>
+
+<script src="pacientes.js"></script>
+<script src="archivos.js"></script>
+<script src="abrir.js"></script>
+<script src="buscadorHistoria.js"></script>
+<script src="app.js"></script>
+
+</body>
+</html>
